@@ -9,7 +9,7 @@ import {
 
 import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
 
-export const transactionTypeEnum = pgEnum('trasaction_type', [
+export const transactionTypeEnum = pgEnum('transaction_type', [
 	'earning',
 	'expense',
 	'investment',
@@ -17,13 +17,17 @@ export const transactionTypeEnum = pgEnum('trasaction_type', [
 
 export const transactions = pgTable('transactions', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').references(() => usersTable.id),
-	name: varchar('name', { length: 256 }),
-	date: timestamp('date').defaultNow().notNull(),
-	amount: numeric('amount', { precision: 10, scale: 2 }),
+	userId: uuid('user_id').references(() => usersTable.id, {
+		onDelete: 'cascade',
+	}),
+	name: varchar('name', { length: 100 }).notNull(),
+	date: timestamp('date', { withTimezone: true }).defaultNow().notNull(),
+	amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
 	type: transactionTypeEnum('type').notNull(),
-	createdAt: timestamp('created_at').defaultNow().notNull(),
-	updatedAt: timestamp('updated_at')
+	createdAt: timestamp('created_at', { withTimezone: true })
+		.defaultNow()
+		.notNull(),
+	updatedAt: timestamp('updated_at', { withTimezone: true })
 		.defaultNow()
 		.notNull()
 		.$onUpdate(() => new Date()),
