@@ -5,4 +5,5 @@ export const envSchema = z.object({
 	SERVER_PORT: z.coerce.number().default(3333),
 	SERVER_HOST: z.string().default('0.0.0.0'),
 	DATABASE_URL: z.url(),
+	JWT_SECRET: z.string(),
 });

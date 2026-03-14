@@ -4,11 +4,13 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 
 export class UpdateUserProfileController {
 	public async handle(request: FastifyRequest, reply: FastifyReply) {
+		const userId = request.user.sub;
+
 		const data = updateUserProfileBodySchema.parse(request.body);
 
 		const updateUserProfileService = new UpdateUserProfileService();
 
-		const { user } = await updateUserProfileService.execute('', data);
+		const { user } = await updateUserProfileService.execute(userId, data);
 
 		return reply.status(200).send({ user });
 	}
