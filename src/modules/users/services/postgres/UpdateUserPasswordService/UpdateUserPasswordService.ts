@@ -7,19 +7,17 @@ import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 
 interface IUpdateUserPassword {
+	userId: string;
 	oldPassword: string;
 	newPassword: string;
 }
 
 export class UpdateUserPasswordService {
-	public async execute(
-		userId: string,
-		data: IUpdateUserPassword
-	): Promise<void> {
+	public async execute(data: IUpdateUserPassword): Promise<void> {
 		const [user] = await db
 			.select()
 			.from(usersTable)
-			.where(eq(usersTable.id, userId));
+			.where(eq(usersTable.id, data.userId));
 
 		if (!user) {
 			throw new AppError(ERROR_CODES.USER_NOT_FOUND, 404);
@@ -43,7 +41,7 @@ export class UpdateUserPasswordService {
 			.set({
 				passwordHash,
 			})
-			.where(eq(usersTable.id, userId));
+			.where(eq(usersTable.id, data.userId));
 
 		return;
 	}

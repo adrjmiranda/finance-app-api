@@ -1,0 +1,22 @@
+import { updateUserPasswordBodySchema } from '#/modules/users/schemas/requests/body/update-user-password-body-schema.js';
+import { UpdateUserPasswordService } from '#/modules/users/services/postgres/UpdateUserPasswordService/UpdateUserPasswordService.js';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+
+export class UpdateUserPasswordController {
+	public async handle(request: FastifyRequest, reply: FastifyReply) {
+		const userId = request.user.sub;
+		const { oldPassword, newPassword } = updateUserPasswordBodySchema.parse(
+			request.body
+		);
+
+		const updateUserPasswordService = new UpdateUserPasswordService();
+
+		await updateUserPasswordService.execute({
+			userId,
+			oldPassword,
+			newPassword,
+		});
+
+		return reply.status(204).send();
+	}
+}
