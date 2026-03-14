@@ -14,7 +14,7 @@ interface ICreateUser {
 }
 
 export class CreateUserService {
-	async execute({ firstName, lastName, email, password }: ICreateUser) {
+	public async execute({ firstName, lastName, email, password }: ICreateUser) {
 		const [userWithSameEmail] = await db
 			.select()
 			.from(usersTable)
