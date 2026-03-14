@@ -1,10 +1,10 @@
-import { getUserProfileParam } from '#/modules/users/schemas/requests/param/get-user-profile-param.js';
+import { getUserProfileParamSchema } from '#/modules/users/schemas/requests/param/get-user-profile-param-schema.js';
 import { GetUserProfileService } from '#/modules/users/services/postgres/GetUserProfileService/GetUserProfileService.js';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 export class GetUserProfileController {
 	public async handle(request: FastifyRequest, reply: FastifyReply) {
-		const { userId } = getUserProfileParam.parse(request.params);
+		const { userId } = getUserProfileParamSchema.parse(request.params);
 
 		const getUserProfileService = new GetUserProfileService();
 
