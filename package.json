@@ -5,7 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"dev": "tsx watch src/index.ts",
+		"dev": "tsx watch src/shared/infra/http/server.ts",
 		"build": "tsc",
 		"start": "node dist/index.js",
 		"prepare": "husky",
@@ -55,6 +55,7 @@
 	"dependencies": {
 		"dotenv": "^17.3.1",
 		"drizzle-orm": "^0.45.1",
+		"fastify": "^5.8.2",
 		"pg": "^8.20.0",
 		"zod": "^4.3.6"
 	}
