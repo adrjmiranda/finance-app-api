@@ -29,6 +29,13 @@
       "when": 1773481431428,
       "tag": "0003_dazzling_pete_wisdom",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1773500419386,
+      "tag": "0004_pretty_golden_guardian",
+      "breakpoints": true
     }
   ]
 }
