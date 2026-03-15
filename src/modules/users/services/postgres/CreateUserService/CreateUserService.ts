@@ -1,3 +1,5 @@
+import { injectable } from 'tsyringe';
+
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
 import { AppError } from '#/shared/error/AppError.js';
 import { db } from '#/shared/infra/database/drizzle/db.js';
@@ -13,6 +15,7 @@ interface ICreateUser {
 	password: string;
 }
 
+@injectable()
 export class CreateUserService {
 	public async execute({ firstName, lastName, email, password }: ICreateUser) {
 		const [userWithSameEmail] = await db

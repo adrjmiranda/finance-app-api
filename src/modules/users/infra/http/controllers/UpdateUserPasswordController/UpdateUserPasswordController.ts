@@ -1,7 +1,10 @@
+import { injectable, container } from 'tsyringe';
+
 import { updateUserPasswordBodySchema } from '#/modules/users/schemas/requests/body/update-user-password-body-schema.js';
 import { UpdateUserPasswordService } from '#/modules/users/services/postgres/UpdateUserPasswordService/UpdateUserPasswordService.js';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
+@injectable()
 export class UpdateUserPasswordController {
 	public async handle(request: FastifyRequest, reply: FastifyReply) {
 		const userId = request.user.sub;
@@ -9,7 +12,9 @@ export class UpdateUserPasswordController {
 			request.body
 		);
 
-		const updateUserPasswordService = new UpdateUserPasswordService();
+		const updateUserPasswordService = container.resolve(
+			UpdateUserPasswordService
+		);
 
 		await updateUserPasswordService.execute({
 			userId,

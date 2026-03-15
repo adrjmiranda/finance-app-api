@@ -1,12 +1,16 @@
+import { injectable, container } from 'tsyringe';
+
 import { authenticateBodySchema } from '#/modules/users/schemas/requests/body/authenticate-body-schema.js';
 import { AuthenticateUserService } from '#/modules/users/services/postgres/AuthenticateUserService/AuthenticateUserService.js';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
+@injectable()
 export class AuthenticateUserController {
 	public async handle(request: FastifyRequest, reply: FastifyReply) {
 		const { email, password } = authenticateBodySchema.parse(request.body);
 
-		const authenticateUserService = new AuthenticateUserService();
+		const authenticateUserService = container.resolve(AuthenticateUserService);
+
 		const { user } = await authenticateUserService.execute({
 			email,
 			password,

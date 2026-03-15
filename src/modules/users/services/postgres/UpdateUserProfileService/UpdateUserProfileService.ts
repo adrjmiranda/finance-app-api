@@ -1,3 +1,5 @@
+import { injectable } from 'tsyringe';
+
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
 import { AppError } from '#/shared/error/AppError.js';
 import { db } from '#/shared/infra/database/drizzle/db.js';
@@ -10,6 +12,7 @@ interface IUpdateUserService {
 	email?: string | undefined;
 }
 
+@injectable()
 export class UpdateUserProfileService {
 	public async execute(userId: string, data: IUpdateUserService) {
 		const [user] = await db

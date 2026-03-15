@@ -1,3 +1,5 @@
+import { injectable } from 'tsyringe';
+
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
 import { AppError } from '#/shared/error/AppError.js';
 import { db } from '#/shared/infra/database/drizzle/db.js';
@@ -11,6 +13,7 @@ interface IAuthenticateUser {
 	password: string;
 }
 
+@injectable()
 export class AuthenticateUserService {
 	public async execute({ email, password }: IAuthenticateUser) {
 		const [user] = await db

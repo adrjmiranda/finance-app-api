@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import { env } from '#/shared/env/env.js';
 import { app } from '#/shared/infra/http/app.js';
 
