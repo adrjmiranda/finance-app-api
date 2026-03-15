@@ -12,7 +12,7 @@ interface IGetUserProfile {
 
 @injectable()
 export class GetUserProfileService {
-	public async execute({ userId }: IGetUserProfile) {
+	public execute = async ({ userId }: IGetUserProfile) => {
 		const [user] = await db
 			.select({
 				id: usersTable.id,
@@ -32,5 +32,5 @@ export class GetUserProfileService {
 		return {
 			user,
 		};
-	}
+	};
 }

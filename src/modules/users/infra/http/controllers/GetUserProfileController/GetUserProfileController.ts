@@ -5,7 +5,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 
 @injectable()
 export class GetUserProfileController {
-	public async handle(request: FastifyRequest, reply: FastifyReply) {
+	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
 		const userId = request.user.sub;
 
 		const getUserProfileService = container.resolve(GetUserProfileService);
@@ -13,5 +13,5 @@ export class GetUserProfileController {
 		const { user } = await getUserProfileService.execute({ userId });
 
 		return reply.status(200).send({ user });
-	}
+	};
 }

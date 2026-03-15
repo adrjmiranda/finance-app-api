@@ -16,7 +16,7 @@ interface IUpdateUserPassword {
 
 @injectable()
 export class UpdateUserPasswordService {
-	public async execute(data: IUpdateUserPassword): Promise<void> {
+	public execute = async (data: IUpdateUserPassword): Promise<void> => {
 		const [user] = await db
 			.select()
 			.from(usersTable)
@@ -47,5 +47,5 @@ export class UpdateUserPasswordService {
 			.where(eq(usersTable.id, data.userId));
 
 		return;
-	}
+	};
 }

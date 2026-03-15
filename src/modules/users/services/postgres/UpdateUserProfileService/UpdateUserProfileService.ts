@@ -14,7 +14,7 @@ interface IUpdateUserService {
 
 @injectable()
 export class UpdateUserProfileService {
-	public async execute(userId: string, data: IUpdateUserService) {
+	public execute = async (userId: string, data: IUpdateUserService) => {
 		const [user] = await db
 			.select()
 			.from(usersTable)
@@ -55,5 +55,5 @@ export class UpdateUserProfileService {
 			});
 
 		return { user: updatedUser };
-	}
+	};
 }

@@ -6,7 +6,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 
 @injectable()
 export class UpdateUserPasswordController {
-	public async handle(request: FastifyRequest, reply: FastifyReply) {
+	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
 		const userId = request.user.sub;
 		const { oldPassword, newPassword } = updateUserPasswordBodySchema.parse(
 			request.body
@@ -23,5 +23,5 @@ export class UpdateUserPasswordController {
 		});
 
 		return reply.status(204).send();
-	}
+	};
 }

@@ -17,7 +17,12 @@ interface ICreateUser {
 
 @injectable()
 export class CreateUserService {
-	public async execute({ firstName, lastName, email, password }: ICreateUser) {
+	public execute = async ({
+		firstName,
+		lastName,
+		email,
+		password,
+	}: ICreateUser) => {
 		const [userWithSameEmail] = await db
 			.select()
 			.from(usersTable)
@@ -48,5 +53,5 @@ export class CreateUserService {
 			});
 
 		return { user: createdUser };
-	}
+	};
 }

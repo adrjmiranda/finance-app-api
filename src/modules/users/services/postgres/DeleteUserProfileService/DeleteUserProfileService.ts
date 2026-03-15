@@ -15,10 +15,10 @@ interface IDeleteUserProfile {
 
 @injectable()
 export class DeleteUserProfileService {
-	public async execute({
+	public execute = async ({
 		userId,
 		password,
-	}: IDeleteUserProfile): Promise<void> {
+	}: IDeleteUserProfile): Promise<void> => {
 		const [user] = await db
 			.select()
 			.from(usersTable)
@@ -37,5 +37,5 @@ export class DeleteUserProfileService {
 		await db.delete(usersTable).where(eq(usersTable.id, userId));
 
 		return;
-	}
+	};
 }

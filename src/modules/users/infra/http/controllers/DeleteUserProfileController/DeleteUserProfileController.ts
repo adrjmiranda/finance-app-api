@@ -7,7 +7,7 @@ import { DeleteUserProfileService } from '#/modules/users/services/postgres/Dele
 
 @injectable()
 export class DeleteUserProfileController {
-	public async handle(request: FastifyRequest, reply: FastifyReply) {
+	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
 		const userId = request.user.sub;
 		const { password } = deleteUserProfileBodySchema.parse(request.body);
 
@@ -21,5 +21,5 @@ export class DeleteUserProfileController {
 		});
 
 		return reply.status(204).send();
-	}
+	};
 }

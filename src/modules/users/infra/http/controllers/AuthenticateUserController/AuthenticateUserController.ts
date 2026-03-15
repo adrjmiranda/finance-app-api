@@ -6,7 +6,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 
 @injectable()
 export class AuthenticateUserController {
-	public async handle(request: FastifyRequest, reply: FastifyReply) {
+	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
 		const { email, password } = authenticateBodySchema.parse(request.body);
 
 		const authenticateUserService = container.resolve(AuthenticateUserService);
@@ -24,5 +24,5 @@ export class AuthenticateUserController {
 			user,
 			token,
 		});
-	}
+	};
 }

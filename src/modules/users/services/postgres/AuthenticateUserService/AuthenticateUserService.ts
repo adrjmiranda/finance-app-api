@@ -15,7 +15,7 @@ interface IAuthenticateUser {
 
 @injectable()
 export class AuthenticateUserService {
-	public async execute({ email, password }: IAuthenticateUser) {
+	public execute = async ({ email, password }: IAuthenticateUser) => {
 		const [user] = await db
 			.select()
 			.from(usersTable)
@@ -41,5 +41,5 @@ export class AuthenticateUserService {
 				updatedAt: user.updatedAt,
 			},
 		};
-	}
+	};
 }
