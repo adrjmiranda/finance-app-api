@@ -3,12 +3,15 @@ import { AppError } from '#/shared/error/AppError.js';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 export class VerifyJWT {
-	public static async handle(request: FastifyRequest, _reply: FastifyReply) {
+	public static handle = async (
+		request: FastifyRequest,
+		_reply: FastifyReply
+	) => {
 		try {
 			await request.jwtVerify();
 		} catch (error) {
 			if (error instanceof AppError) throw error;
 			throw new AppError(ERROR_CODES.UNAUTHORIZED, 401);
 		}
-	}
+	};
 }
