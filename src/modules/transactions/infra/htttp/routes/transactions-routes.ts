@@ -1,10 +1,14 @@
-import { VerifyJWT } from '#/shared/infra/http/middlewares/VerifyJWT.js';
 import type { FastifyInstance } from 'fastify';
+
+import { VerifyJWT } from '#/shared/infra/http/middlewares/VerifyJWT.js';
+
 import { container } from 'tsyringe';
+
 import { CreateTransactionController } from '../controllers/CreateTransactionController/CreateTransactionController.js';
 import { GetTransactionController } from '../controllers/GetTransactionController/GetTransactionController.js';
 import { ListTransactionsController } from '../controllers/ListTransactionsController/ListTransactionsController.js';
 import { UpdateTransactionController } from '../controllers/UpdateTransactionController/UpdateTransactionController.js';
+import { DeleteTransactionController } from '../controllers/DeleteTransactionController/DeleteTransactionController.js';
 
 export async function transactionsRoutes(app: FastifyInstance) {
 	app.addHook('onRequest', VerifyJWT.handle);
@@ -19,9 +23,13 @@ export async function transactionsRoutes(app: FastifyInstance) {
 	const updateTransactionController = container.resolve(
 		UpdateTransactionController
 	);
+	const deleteTransactionController = container.resolve(
+		DeleteTransactionController
+	);
 
 	app.post('/', createTransactionController.handle);
 	app.get('/:transactionId', getTransactionController.handle);
 	app.get('/', listTransactionsController.handle);
 	app.patch('/:transactionId', updateTransactionController.handle);
+	app.delete('/:transactionId', deleteTransactionController.handle);
 }
