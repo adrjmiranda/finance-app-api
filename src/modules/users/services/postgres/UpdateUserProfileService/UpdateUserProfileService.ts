@@ -5,8 +5,10 @@ import { AppError } from '#/shared/error/AppError.js';
 import { db } from '#/shared/infra/database/drizzle/db.js';
 import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
 import { eq } from 'drizzle-orm';
+import { removeUndefined } from '#/shared/utils/remove-undefined.js';
 
 interface IUpdateUserService {
+	userId: string;
 	firstName?: string | undefined;
 	lastName?: string | undefined;
 	email?: string | undefined;
@@ -14,7 +16,12 @@ interface IUpdateUserService {
 
 @injectable()
 export class UpdateUserProfileService {
-	public execute = async (userId: string, data: IUpdateUserService) => {
+	public execute = async ({
+		userId,
+		firstName,
+		lastName,
+		email,
+	}: IUpdateUserService) => {
 		const [user] = await db
 			.select()
 			.from(usersTable)
@@ -24,20 +31,22 @@ export class UpdateUserProfileService {
 			throw new AppError(ERROR_CODES.USER_NOT_FOUND, 404);
 		}
 
-		if (data.email) {
+		if (email) {
 			const [userWithSameEmail] = await db
 				.select()
 				.from(usersTable)
-				.where(eq(usersTable.email, data.email));
+				.where(eq(usersTable.email, email));
 
 			if (userWithSameEmail && userWithSameEmail.id !== userId) {
 				throw new AppError(ERROR_CODES.EMAIL_ALREADY_IN_USE, 409);
 			}
 		}
 
-		const updateData = Object.fromEntries(
-			Object.entries(data).filter(([_, value]) => value !== undefined)
-		);
+		const updateData = removeUndefined({
+			firstName,
+			lastName,
+			email,
+		});
 
 		const [updatedUser] = await db
 			.update(usersTable)

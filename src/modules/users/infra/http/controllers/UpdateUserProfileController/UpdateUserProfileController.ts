@@ -9,13 +9,20 @@ export class UpdateUserProfileController {
 	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
 		const userId = request.user.sub;
 
-		const data = updateUserProfileBodySchema.parse(request.body);
+		const { firstName, lastName, email } = updateUserProfileBodySchema.parse(
+			request.body
+		);
 
 		const updateUserProfileService = container.resolve(
 			UpdateUserProfileService
 		);
 
-		const { user } = await updateUserProfileService.execute(userId, data);
+		const { user } = await updateUserProfileService.execute({
+			userId,
+			firstName,
+			lastName,
+			email,
+		});
 
 		return reply.status(200).send({ user });
 	};

@@ -9,11 +9,12 @@ import {
 
 import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
 
-export const transactionTypeEnum = pgEnum('transaction_type', [
-	'earning',
-	'expense',
-	'investment',
-]);
+export const TRANSACTION_TYPES = ['earning', 'expense', 'investment'] as const;
+
+export const transactionTypeEnum = pgEnum(
+	'transaction_type',
+	TRANSACTION_TYPES
+);
 
 export const transactionsTable = pgTable('transactions', {
 	id: uuid('id').primaryKey().defaultRandom(),
