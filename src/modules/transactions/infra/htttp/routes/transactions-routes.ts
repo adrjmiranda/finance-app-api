@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { container } from 'tsyringe';
 import { CreateTransactionController } from '../controllers/CreateTransactionController/CreateTransactionController.js';
 import { GetTransactionController } from '../controllers/GetTransactionController/GetTransactionController.js';
+import { ListTransactionsController } from '../controllers/ListTransactionsController/ListTransactionsController.js';
 
 export async function transactionsRoutes(app: FastifyInstance) {
 	app.addHook('onRequest', VerifyJWT.handle);
@@ -11,7 +12,11 @@ export async function transactionsRoutes(app: FastifyInstance) {
 		CreateTransactionController
 	);
 	const getTransactionController = container.resolve(GetTransactionController);
+	const listTransactionsController = container.resolve(
+		ListTransactionsController
+	);
 
 	app.post('/', createTransactionController.handle);
 	app.get('/:transactionId', getTransactionController.handle);
+	app.get('/', listTransactionsController.handle);
 }
