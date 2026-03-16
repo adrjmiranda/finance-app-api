@@ -2,12 +2,14 @@ import {
 	numeric,
 	pgEnum,
 	pgTable,
+	pgView,
 	timestamp,
 	uuid,
 	varchar,
 } from 'drizzle-orm/pg-core';
 
 import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
+import { sql } from 'drizzle-orm';
 
 export const TRANSACTION_TYPES = ['earning', 'expense', 'investment'] as const;
 
@@ -33,3 +35,22 @@ export const transactionsTable = pgTable('transactions', {
 		.notNull()
 		.$onUpdate(() => new Date()),
 });
+
+export const transactionsBalanceView = pgView('transactions_balance_view', {
+	userId: uuid('user_id'),
+	earnings: numeric('earnings'),
+	expenses: numeric('expenses'),
+	investiments: numeric('investiments'),
+	balance: numeric('balance'),
+}).as(
+	sql`
+    SELECT 
+      ${transactionsTable.userId} as user_id,
+      SUM(CASE WHEN ${transactionsTable.type} = 'earning' THEN ${transactionsTable.amount} ELSE 0 END) as earnings,
+      SUM(CASE WHEN ${transactionsTable.type} = 'expense' THEN ${transactionsTable.amount} ELSE 0 END) as expenses,
+      SUM(CASE WHEN ${transactionsTable.type} = 'investment' THEN ${transactionsTable.amount} ELSE 0 END) as investiments,
+      SUM(CASE WHEN ${transactionsTable.type} = 'earning' THEN ${transactionsTable.amount} ELSE -${transactionsTable.amount} END) as balance
+    FROM ${transactionsTable}
+    GROUP BY ${transactionsTable.userId}
+  `
+);
