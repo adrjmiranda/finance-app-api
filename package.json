@@ -4,7 +4,8 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
+		"test": "node --import tsx --test 'src/**/*.{test,spec}.ts'",
+		"test:watch": "nodemon --watch src -e ts --exec \"npm run test:all\"",
 		"dev": "tsx watch src/shared/infra/http/server.ts",
 		"build": "tsc",
 		"start": "node dist/index.js",
@@ -48,6 +49,7 @@
 		"husky": "^9.1.7",
 		"jiti": "^2.6.1",
 		"lint-staged": "^16.3.3",
+		"nodemon": "^3.1.14",
 		"prettier": "^3.8.1",
 		"ts-node": "^10.9.2",
 		"tsx": "^4.21.0",
