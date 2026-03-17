@@ -19,7 +19,8 @@ export class AuthenticateUserService {
 		const [user] = await db
 			.select()
 			.from(usersTable)
-			.where(eq(usersTable.email, email));
+			.where(eq(usersTable.email, email))
+			.limit(1);
 
 		if (!user) {
 			throw new AppError(ERROR_CODES.USER_NOT_FOUND, 404);

@@ -7,6 +7,7 @@ import { test, describe, beforeEach } from 'node:test';
 import assert from 'node:assert';
 
 import { CreateUserService } from './CreateUserService.js';
+
 import { db } from '#/shared/infra/database/drizzle/db.js';
 import { AppError } from '#/shared/error/AppError.js';
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
