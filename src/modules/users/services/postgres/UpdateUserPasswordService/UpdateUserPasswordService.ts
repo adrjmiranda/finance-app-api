@@ -20,7 +20,8 @@ export class UpdateUserPasswordService {
 		const [user] = await db
 			.select()
 			.from(usersTable)
-			.where(eq(usersTable.id, data.userId));
+			.where(eq(usersTable.id, data.userId))
+			.limit(1);
 
 		if (!user) {
 			throw new AppError(ERROR_CODES.USER_NOT_FOUND, 404);
@@ -44,7 +45,8 @@ export class UpdateUserPasswordService {
 			.set({
 				passwordHash,
 			})
-			.where(eq(usersTable.id, data.userId));
+			.where(eq(usersTable.id, data.userId))
+			.execute();
 
 		return;
 	};
