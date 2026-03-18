@@ -6,6 +6,10 @@
 	"scripts": {
 		"test": "node --import tsx --test 'src/**/*.{test,spec}.ts'",
 		"test:watch": "nodemon --watch src -e ts --exec \"npm run test:all\"",
+		"compose:test:up": "docker compose -f docker-compose.test.yml up -d",
+		"compose:test:down": "docker compose -f docker-compose.test.yml down",
+		"db:test:push": "npx dotenv-cli -e .env.test -- tsx node_modules/drizzle-kit/bin.cjs push",
+		"test:init": "npm run compose:test:up && npm run db:test:push && npx dotenv-cli -e .env.test -- node --import tsx --test 'src/**/*.spec.ts'",
 		"dev": "tsx watch src/shared/infra/http/server.ts",
 		"build": "tsc",
 		"start": "node dist/index.js",
@@ -42,6 +46,7 @@
 		"@types/pg": "^8.18.0",
 		"@types/prettier": "^2.7.3",
 		"@types/reflect-metadata": "^0.0.5",
+		"dotenv-cli": "^11.0.0",
 		"drizzle-kit": "^0.31.9",
 		"eslint": "^10.0.3",
 		"eslint-config-prettier": "^10.1.8",

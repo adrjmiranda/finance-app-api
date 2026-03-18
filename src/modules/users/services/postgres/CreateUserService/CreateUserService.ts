@@ -50,7 +50,8 @@ export class CreateUserService {
 				email: usersTable.email,
 				createdAt: usersTable.createdAt,
 				updatedAt: usersTable.updatedAt,
-			});
+			})
+			.execute();
 
 		return { user: createdUser };
 	};

@@ -44,7 +44,9 @@ describe('UpdateUserProfileService', () => {
 		t.mock.method(db, 'update', () => ({
 			set: () => ({
 				where: () => ({
-					returning: () => Promise.resolve([{ ...mockUser, ...userData }]),
+					returning: () => ({
+						execute: () => Promise.resolve([{ ...mockUser, ...userData }]),
+					}),
 				}),
 			}),
 		}));

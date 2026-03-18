@@ -63,7 +63,8 @@ export class UpdateUserProfileService {
 				email: usersTable.email,
 				createdAt: usersTable.createdAt,
 				updatedAt: usersTable.updatedAt,
-			});
+			})
+			.execute();
 
 		return { user: updatedUser };
 	};

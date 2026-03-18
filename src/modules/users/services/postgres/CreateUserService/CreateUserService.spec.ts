@@ -40,7 +40,9 @@ describe('CreateUserService', () => {
 
 		t.mock.method(db, 'insert', () => ({
 			values: () => ({
-				returning: () => Promise.resolve([mockCreatedUser]),
+				returning: () => ({
+					execute: () => Promise.resolve([mockCreatedUser]),
+				}),
 			}),
 		}));
 
