@@ -25,7 +25,8 @@ export class UpdateUserProfileService {
 		const [user] = await db
 			.select()
 			.from(usersTable)
-			.where(eq(usersTable.id, userId));
+			.where(eq(usersTable.id, userId))
+			.limit(1);
 
 		if (!user) {
 			throw new AppError(ERROR_CODES.USER_NOT_FOUND, 404);
@@ -35,7 +36,8 @@ export class UpdateUserProfileService {
 			const [userWithSameEmail] = await db
 				.select()
 				.from(usersTable)
-				.where(eq(usersTable.email, email));
+				.where(eq(usersTable.email, email))
+				.limit(1);
 
 			if (userWithSameEmail && userWithSameEmail.id !== userId) {
 				throw new AppError(ERROR_CODES.EMAIL_ALREADY_IN_USE, 409);
