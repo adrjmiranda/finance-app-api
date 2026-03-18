@@ -1,11 +1,10 @@
 services:
   database_test:
-    image: postgres:16-alpine # Recomendo a 16 ou 17 estável, a 18 ainda é muito recente
+    image: postgres:16-alpine
     container_name: finance-app-db-test
     environment:
       POSTGRES_USER: adriano
       POSTGRES_PASSWORD: secure_db_password
       POSTGRES_DB: finance_db_test
     ports:
-      - '5433:5432' # Note a porta 5433 para evitar conflito
-    # Sem volumes para os testes serem mais rápidos e isolados
+      - '5433:5432'
