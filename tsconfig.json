@@ -40,8 +40,8 @@
 
 		// Recommended Options
 		"jsx": "react-jsx",
-		"verbatimModuleSyntax": false,
-		"isolatedModules": false,
+		"verbatimModuleSyntax": true,
+		"isolatedModules": true,
 		"noUncheckedSideEffectImports": true,
 		"moduleDetection": "force",
 

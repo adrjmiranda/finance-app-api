@@ -1,5 +1,5 @@
-import { FastifyReply, FastifyRequest } from 'fastify';
-import { Mock } from 'node:test';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { Mock } from 'node:test';
 
 export type MockRequest = FastifyRequest & {
 	query: unknown;
