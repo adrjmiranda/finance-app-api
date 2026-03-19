@@ -1,0 +1,46 @@
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { Mock } from 'node:test';
+
+export type MockRequest = FastifyRequest & {
+	query: unknown;
+	params: unknown;
+	body: unknown;
+};
+
+export type MockReply = FastifyReply & {
+	status: Mock<(code: number) => FastifyReply>;
+	send: Mock<(payload?: unknown) => FastifyReply>;
+};
+
+interface TestContext {
+	mock: {
+		fn: <T extends (...args: never[]) => unknown>(
+			implementation?: T
+		) => Mock<T>;
+	};
+}
+
+export function createMockReply(t: TestContext): MockReply {
+	const mockReply = {
+		status: t.mock.fn((_code: number) => mockReply),
+		send: t.mock.fn((_payload?: unknown) => mockReply),
+	} as unknown as MockReply;
+
+	return mockReply;
+}
+
+export function createMockRequest({
+	query,
+	params,
+	body,
+}: {
+	query?: unknown;
+	params?: unknown;
+	body?: unknown;
+} = {}): MockRequest {
+	return {
+		query: query ?? {},
+		params: params ?? {},
+		body: body ?? {},
+	} as unknown as MockRequest;
+}

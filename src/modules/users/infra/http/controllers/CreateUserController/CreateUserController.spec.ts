@@ -1,18 +1,18 @@
 import 'reflect-metadata';
+
 import { describe, test, beforeEach, type Mock } from 'node:test';
 import assert from 'node:assert';
+
 import { container } from 'tsyringe';
 
-import { CreateUserController } from './CreateUserController.js';
 import { createUserBodySchema } from '#/modules/users/schemas/requests/body/create-user-body-schema.js';
+import { CreateUserController } from './CreateUserController.js';
 import { CreateUserService } from '#/modules/users/services/postgres/CreateUserService/CreateUserService.js';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 
-// Tipos utilitários para reduzir o ruído nos testes
-type MockReply = FastifyReply & {
-	status: Mock<(code: number) => FastifyReply>;
-	send: Mock<(payload?: unknown) => FastifyReply>;
-};
+import {
+	createMockReply,
+	createMockRequest,
+} from '#/test/utils/fastify-mock.js';
 
 describe('CreateUserController', () => {
 	let createUserController: CreateUserController;
@@ -22,7 +22,6 @@ describe('CreateUserController', () => {
 		container.clearInstances();
 		const childContainer = container.createChildContainer();
 
-		// Criamos o service como um objeto de mocks
 		createUserService = {
 			execute: async () => ({
 				user: undefined,
@@ -34,7 +33,6 @@ describe('CreateUserController', () => {
 	});
 
 	test('should create a new user', async (t) => {
-		// 1. Setup de dados (DADO/GIVEN)
 		const userPayload = {
 			firstName: 'John',
 			lastName: 'Doe',
@@ -49,24 +47,18 @@ describe('CreateUserController', () => {
 			updatedAt: new Date(),
 		};
 
-		// 2. Setup de Mocks (QUANDO/WHEN)
-		const mockRequest = { body: userPayload } as FastifyRequest;
+		const mockRequest = createMockRequest({
+			body: userPayload,
+		});
+		const mockReply = createMockReply(t);
 
-		const mockReply = {
-			status: t.mock.fn(() => mockReply),
-			send: t.mock.fn(() => mockReply),
-		} as unknown as MockReply;
-
-		// Mock do Schema e do Service
 		t.mock.method(createUserBodySchema, 'parse', () => userPayload);
 		t.mock.method(createUserService, 'execute', async () => ({
 			user: userData,
 		}));
 
-		// 3. Execução (AÇÃO/ACT)
 		await createUserController.handle(mockRequest, mockReply);
 
-		// 4. Verificações (ENTÃO/THEN)
 		assert.strictEqual(mockReply.status.mock.calls[0]?.arguments[0], 201);
 		assert.deepStrictEqual(mockReply.send.mock.calls[0]?.arguments[0], {
 			user: userData,
@@ -81,12 +73,10 @@ describe('CreateUserController', () => {
 			password: 'password123',
 		};
 
-		const mockRequest = { body: userPayload } as FastifyRequest;
-
-		const mockReply = {
-			status: t.mock.fn(() => mockReply),
-			send: t.mock.fn(() => mockReply),
-		} as unknown as MockReply;
+		const mockRequest = createMockRequest({
+			body: userPayload,
+		});
+		const mockReply = createMockReply(t);
 
 		t.mock.method(createUserBodySchema, 'parse', () => userPayload);
 
@@ -106,12 +96,10 @@ describe('CreateUserController', () => {
 	});
 
 	test('should throw an error if body is invalid', async (t) => {
-		const mockRequest = { body: {} } as FastifyRequest;
-
-		const mockReply = {
-			status: t.mock.fn(() => mockReply),
-			send: t.mock.fn(() => mockReply),
-		} as unknown as MockReply;
+		const mockRequest = createMockRequest({
+			body: {},
+		});
+		const mockReply = createMockReply(t);
 
 		t.mock.method(createUserBodySchema, 'parse', () => {
 			throw new Error('Validation error');
