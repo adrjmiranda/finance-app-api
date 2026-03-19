@@ -2,10 +2,15 @@ import { updateTransactionBodySchema } from '#/modules/transactions/schemas/requ
 import { getTransactionParamsSchema } from '#/modules/transactions/schemas/requests/params/get-transaction-params-schema.js';
 import { UpdateTransactionService } from '#/modules/transactions/services/postgres/UpdateTransactionService/UpdateTransactionService.js';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { container, injectable } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
 
 injectable();
 export class UpdateTransactionController {
+	constructor(
+		@inject(UpdateTransactionService)
+		private updateTransactionService: UpdateTransactionService
+	) {}
+
 	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
 		const userId = request.user.sub;
 		const { transactionId } = getTransactionParamsSchema.parse(request.params);
@@ -13,11 +18,7 @@ export class UpdateTransactionController {
 			request.body
 		);
 
-		const updateTransactionService = container.resolve(
-			UpdateTransactionService
-		);
-
-		const { transaction } = await updateTransactionService.execute({
+		const { transaction } = await this.updateTransactionService.execute({
 			userId,
 			transactionId,
 			name,

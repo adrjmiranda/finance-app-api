@@ -1,4 +1,4 @@
-import { container, injectable } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
 
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
@@ -7,17 +7,18 @@ import { CreateTransactionService } from '#/modules/transactions/services/postgr
 
 @injectable()
 export class CreateTransactionController {
+	constructor(
+		@inject(CreateTransactionService)
+		private createTransactionService: CreateTransactionService
+	) {}
+
 	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
 		const userId = request.user.sub;
 		const { name, date, amount, type } = createTransactionBodySchema.parse(
 			request.body
 		);
 
-		const createTransactionService = container.resolve(
-			CreateTransactionService
-		);
-
-		const { transaction } = await createTransactionService.execute({
+		const { transaction } = await this.createTransactionService.execute({
 			userId,
 			name,
 			date,

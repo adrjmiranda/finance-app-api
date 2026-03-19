@@ -1,4 +1,4 @@
-import { injectable, container } from 'tsyringe';
+import { injectable, inject } from 'tsyringe';
 
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
@@ -7,15 +7,16 @@ import { DeleteUserProfileService } from '#/modules/users/services/postgres/Dele
 
 @injectable()
 export class DeleteUserProfileController {
+	constructor(
+		@inject(DeleteUserProfileService)
+		private deleteUserProfileService: DeleteUserProfileService
+	) {}
+
 	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
 		const userId = request.user.sub;
 		const { password } = deleteUserProfileBodySchema.parse(request.body);
 
-		const deleteUserProfileService = container.resolve(
-			DeleteUserProfileService
-		);
-
-		await deleteUserProfileService.execute({
+		await this.deleteUserProfileService.execute({
 			userId,
 			password,
 		});

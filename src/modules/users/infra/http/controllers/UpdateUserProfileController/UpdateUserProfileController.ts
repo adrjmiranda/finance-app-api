@@ -1,4 +1,4 @@
-import { injectable, container } from 'tsyringe';
+import { injectable, inject } from 'tsyringe';
 
 import { updateUserProfileBodySchema } from '#/modules/users/schemas/requests/body/update-user-profile-body-schema.js';
 import { UpdateUserProfileService } from '#/modules/users/services/postgres/UpdateUserProfileService/UpdateUserProfileService.js';
@@ -6,6 +6,11 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 
 @injectable()
 export class UpdateUserProfileController {
+	constructor(
+		@inject(UpdateUserProfileService)
+		private updateUserProfileService: UpdateUserProfileService
+	) {}
+
 	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
 		const userId = request.user.sub;
 
@@ -13,11 +18,7 @@ export class UpdateUserProfileController {
 			request.body
 		);
 
-		const updateUserProfileService = container.resolve(
-			UpdateUserProfileService
-		);
-
-		const { user } = await updateUserProfileService.execute({
+		const { user } = await this.updateUserProfileService.execute({
 			userId,
 			firstName,
 			lastName,
