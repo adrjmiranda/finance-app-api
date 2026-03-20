@@ -3,7 +3,7 @@ import { GetTransactionService } from '#/modules/transactions/services/postgres/
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { inject, injectable } from 'tsyringe';
 
-injectable();
+@injectable()
 export class GetTransactionController {
 	constructor(
 		@inject(GetTransactionService)

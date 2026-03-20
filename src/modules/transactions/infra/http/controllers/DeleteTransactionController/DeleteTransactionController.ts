@@ -3,7 +3,7 @@ import { DeleteTransactionService } from '#/modules/transactions/services/postgr
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { inject, injectable } from 'tsyringe';
 
-injectable();
+@injectable()
 export class DeleteTransactionController {
 	constructor(
 		@inject(DeleteTransactionService)

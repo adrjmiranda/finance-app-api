@@ -2,7 +2,7 @@ import { ListTransactionsService } from '#/modules/transactions/services/postgre
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { inject, injectable } from 'tsyringe';
 
-injectable();
+@injectable()
 export class ListTransactionsController {
 	constructor(
 		@inject(ListTransactionsService)

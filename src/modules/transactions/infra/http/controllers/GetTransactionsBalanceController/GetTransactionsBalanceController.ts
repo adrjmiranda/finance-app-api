@@ -2,7 +2,7 @@ import { GetTransactionsBalanceService } from '#/modules/transactions/services/p
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { inject, injectable } from 'tsyringe';
 
-injectable();
+@injectable()
 export class GetTransactionsBalanceController {
 	constructor(
 		@inject(GetTransactionsBalanceService)
