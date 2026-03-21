@@ -5,6 +5,11 @@ export type MockRequest = FastifyRequest & {
 	query: unknown;
 	params: unknown;
 	body: unknown;
+	user:
+		| {
+				sub: string;
+		  }
+		| undefined;
 };
 
 export type MockReply = FastifyReply & {
@@ -33,14 +38,19 @@ export function createMockRequest({
 	query,
 	params,
 	body,
+	user,
 }: {
 	query?: unknown;
 	params?: unknown;
 	body?: unknown;
+	user?: {
+		sub: string;
+	};
 } = {}): MockRequest {
 	return {
 		query: query ?? {},
 		params: params ?? {},
 		body: body ?? {},
+		user: user ?? undefined,
 	} as unknown as MockRequest;
 }

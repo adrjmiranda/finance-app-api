@@ -100,9 +100,9 @@ describe('CreateUserController (Integration)', () => {
 		});
 
 		assert.strictEqual(response.statusCode, 400);
-		assert.strictEqual(
-			JSON.parse(response.body).code,
-			ERROR_CODES.EMAIL_ALREADY_IN_USE
-		);
+
+		const body = response.json();
+
+		assert.strictEqual(body.code, ERROR_CODES.EMAIL_ALREADY_IN_USE);
 	});
 });

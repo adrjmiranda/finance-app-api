@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach, type Mock } from 'node:test';
+import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
 
 import { container } from 'tsyringe';
@@ -115,11 +115,10 @@ describe('CreateUserController', () => {
 			}
 		);
 
-		const serviceExecuteFnMock = createUserService.execute as unknown as Mock<
-			typeof createUserService.execute
-		>;
-		const serviceCallCount = serviceExecuteFnMock.mock?.calls.length ?? 0;
+		const executeMock = t.mock.method(createUserService, 'execute', () => {
+			throw new Error('Service error');
+		});
 
-		assert.strictEqual(serviceCallCount, 0);
+		assert.strictEqual(executeMock.mock.callCount(), 0);
 	});
 });
