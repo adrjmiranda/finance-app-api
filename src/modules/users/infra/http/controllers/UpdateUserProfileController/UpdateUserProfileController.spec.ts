@@ -127,7 +127,7 @@ describe('UpdateUserProfileController', () => {
 		const executeMock = t.mock.method(
 			updateUserProfileService,
 			'execute',
-			() => {
+			async () => {
 				throw new Error('Service error');
 			}
 		);

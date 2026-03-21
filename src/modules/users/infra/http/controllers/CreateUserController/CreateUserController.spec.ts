@@ -115,9 +115,13 @@ describe('CreateUserController', () => {
 			}
 		);
 
-		const executeMock = t.mock.method(createUserService, 'execute', () => {
-			throw new Error('Service error');
-		});
+		const executeMock = t.mock.method(
+			createUserService,
+			'execute',
+			async () => {
+				throw new Error('Service error');
+			}
+		);
 
 		assert.strictEqual(executeMock.mock.callCount(), 0);
 	});
