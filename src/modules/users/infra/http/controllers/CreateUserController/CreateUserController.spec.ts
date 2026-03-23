@@ -81,7 +81,7 @@ describe('CreateUserController', () => {
 		t.mock.method(createUserBodySchema, 'parse', () => userPayload);
 
 		t.mock.method(createUserService, 'execute', async () => {
-			throw new Error('Server error');
+			throw new Error('Service error');
 		});
 
 		await assert.rejects(
@@ -90,7 +90,7 @@ describe('CreateUserController', () => {
 			},
 			{
 				name: 'Error',
-				message: 'Server error',
+				message: 'Service error',
 			}
 		);
 	});
