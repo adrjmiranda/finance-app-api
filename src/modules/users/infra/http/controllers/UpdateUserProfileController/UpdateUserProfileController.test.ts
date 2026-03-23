@@ -5,9 +5,9 @@ import assert from 'node:assert';
 import { db } from '#/shared/infra/database/drizzle/db.js';
 import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
 
-import bcrypt from 'bcrypt';
 import { app } from '#/shared/infra/http/app.js';
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
+import { createAndAuthenticateUser } from '#/shared/utils/authenticate-user-helper.js';
 
 describe('UpdateUserProfileController (Integration)', () => {
 	beforeEach(async () => {
@@ -21,31 +21,7 @@ describe('UpdateUserProfileController (Integration)', () => {
 			email: 'adrianoupdate@email.com',
 		};
 
-		const password = 'password123';
-		const passwordHash = await bcrypt.hash(password, 10);
-
-		const [createdUser] = await db
-			.insert(usersTable)
-			.values({
-				firstName: 'Adriano',
-				lastName: 'Miranda',
-				email: 'adriano@email.com',
-				passwordHash,
-			})
-			.returning()
-			.execute();
-
-		const authenticationResponse = await app.inject({
-			method: 'POST',
-			url: '/users/sessions',
-			payload: {
-				email: createdUser?.email,
-				password,
-			},
-		});
-
-		const autenticationBody = JSON.parse(authenticationResponse.payload);
-		const token = autenticationBody.token;
+		const { token, authenticatedUser } = await createAndAuthenticateUser(app);
 
 		const response = await app.inject({
 			method: 'PATCH',
@@ -59,13 +35,13 @@ describe('UpdateUserProfileController (Integration)', () => {
 		const body = JSON.parse(response.payload);
 
 		assert.strictEqual(response.statusCode, 200);
-		assert.strictEqual(body.user.id, createdUser?.id);
+		assert.strictEqual(body.user.id, authenticatedUser?.id);
 		assert.strictEqual(body.user.firstName, userPayload.firstName);
 		assert.strictEqual(body.user.lastName, userPayload.lastName);
 		assert.strictEqual(body.user.email, userPayload.email);
 		assert.strictEqual(
 			body.user.createdAt,
-			createdUser?.createdAt.toISOString()
+			authenticatedUser?.createdAt.toISOString()
 		);
 	});
 
@@ -76,31 +52,7 @@ describe('UpdateUserProfileController (Integration)', () => {
 			email: 'adrianoupdate@email.com',
 		};
 
-		const password = 'password123';
-		const passwordHash = await bcrypt.hash(password, 10);
-
-		const [createdUser] = await db
-			.insert(usersTable)
-			.values({
-				firstName: 'Adriano',
-				lastName: 'Miranda',
-				email: 'adriano@email.com',
-				passwordHash,
-			})
-			.returning()
-			.execute();
-
-		const authenticationResponse = await app.inject({
-			method: 'POST',
-			url: '/users/sessions',
-			payload: {
-				email: createdUser?.email,
-				password,
-			},
-		});
-
-		const autenticationBody = JSON.parse(authenticationResponse.payload);
-		const token = autenticationBody.token;
+		const { token } = await createAndAuthenticateUser(app);
 
 		const response = await app.inject({
 			method: 'PATCH',
@@ -129,31 +81,7 @@ describe('UpdateUserProfileController (Integration)', () => {
 			email: 'adrianoupdate@email.com',
 		};
 
-		const password = 'password123';
-		const passwordHash = await bcrypt.hash(password, 10);
-
-		const [createdUser] = await db
-			.insert(usersTable)
-			.values({
-				firstName: 'Adriano',
-				lastName: 'Miranda',
-				email: 'adriano@email.com',
-				passwordHash,
-			})
-			.returning()
-			.execute();
-
-		const authenticationResponse = await app.inject({
-			method: 'POST',
-			url: '/users/sessions',
-			payload: {
-				email: createdUser?.email,
-				password,
-			},
-		});
-
-		const autenticationBody = JSON.parse(authenticationResponse.payload);
-		const token = autenticationBody.token;
+		const { token } = await createAndAuthenticateUser(app);
 
 		const response = await app.inject({
 			method: 'PATCH',
