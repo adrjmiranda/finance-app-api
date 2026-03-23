@@ -33,5 +33,6 @@ export async function createAndAuthenticateUser(app: FastifyInstance) {
 	return {
 		token: body.token as string,
 		authenticatedUser: user,
+		password,
 	};
 }
