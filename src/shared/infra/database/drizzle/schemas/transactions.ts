@@ -20,9 +20,11 @@ export const transactionTypeEnum = pgEnum(
 
 export const transactionsTable = pgTable('transactions', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').references(() => usersTable.id, {
-		onDelete: 'cascade',
-	}),
+	userId: uuid('user_id')
+		.references(() => usersTable.id, {
+			onDelete: 'cascade',
+		})
+		.notNull(),
 	name: varchar('name', { length: 100 }).notNull(),
 	date: timestamp('date', { withTimezone: true }).defaultNow().notNull(),
 	amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
