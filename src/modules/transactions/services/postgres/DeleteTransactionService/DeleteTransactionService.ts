@@ -17,7 +17,8 @@ export class DeleteTransactionService {
 		const [user] = await db
 			.select()
 			.from(usersTable)
-			.where(eq(usersTable.id, userId));
+			.where(eq(usersTable.id, userId))
+			.limit(1);
 
 		if (!user) {
 			throw new AppError(ERROR_CODES.USER_NOT_FOUND, 404);
@@ -31,7 +32,8 @@ export class DeleteTransactionService {
 					eq(transactionsTable.id, transactionId)
 				)
 			)
-			.returning();
+			.returning()
+			.execute();
 
 		if (!deletedTransaction) {
 			throw new AppError(ERROR_CODES.TRANSACTION_NOT_FOUND, 404);
