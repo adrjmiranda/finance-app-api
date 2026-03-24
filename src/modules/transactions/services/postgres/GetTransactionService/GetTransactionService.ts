@@ -17,7 +17,8 @@ export class GetTransactionService {
 		const [user] = await db
 			.select()
 			.from(usersTable)
-			.where(eq(usersTable.id, userId));
+			.where(eq(usersTable.id, userId))
+			.limit(1);
 
 		if (!user) {
 			throw new AppError(ERROR_CODES.USER_NOT_FOUND, 404);
@@ -31,7 +32,8 @@ export class GetTransactionService {
 					eq(transactionsTable.userId, userId),
 					eq(transactionsTable.id, transactionId)
 				)
-			);
+			)
+			.limit(1);
 
 		if (!transaction) {
 			throw new AppError(ERROR_CODES.TRANSACTION_NOT_FOUND, 404);
