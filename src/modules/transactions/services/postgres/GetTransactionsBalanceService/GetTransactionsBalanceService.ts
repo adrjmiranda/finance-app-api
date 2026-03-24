@@ -16,7 +16,8 @@ export class GetTransactionsBalanceService {
 		const [user] = await db
 			.select()
 			.from(usersTable)
-			.where(eq(usersTable.id, userId));
+			.where(eq(usersTable.id, userId))
+			.limit(1);
 
 		if (!user) {
 			throw new AppError(ERROR_CODES.USER_NOT_FOUND, 404);
@@ -25,12 +26,13 @@ export class GetTransactionsBalanceService {
 		const [overview] = await db
 			.select()
 			.from(transactionsBalanceView)
-			.where(eq(transactionsBalanceView.userId, userId));
+			.where(eq(transactionsBalanceView.userId, userId))
+			.execute();
 
 		return {
 			earnings: Number(overview?.earnings ?? 0),
 			expenses: Number(overview?.expenses ?? 0),
-			investiments: Number(overview?.investiments ?? 0),
+			investments: Number(overview?.investments ?? 0),
 			balance: Number(overview?.balance ?? 0),
 		};
 	};
