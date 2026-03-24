@@ -1,9 +1,8 @@
 import bcrypt from 'bcrypt';
 import { db } from '#/shared/infra/database/drizzle/db.js';
 import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
-import { transactionsTable } from '../infra/database/drizzle/schemas/transactions.js';
 
-export async function createUserAndTransaction() {
+export async function createUser() {
 	const password = 'password123';
 	const passwordHash = await bcrypt.hash(password, 10);
 
@@ -18,19 +17,5 @@ export async function createUserAndTransaction() {
 		.returning()
 		.execute();
 
-	const [transaction] = user
-		? await db
-				.insert(transactionsTable)
-				.values({
-					userId: user.id,
-					name: 'Test Transaction',
-					date: new Date(),
-					amount: String(100.0),
-					type: 'earning',
-				})
-				.returning()
-				.execute()
-		: [undefined];
-
-	return { user, transaction };
+	return { user };
 }

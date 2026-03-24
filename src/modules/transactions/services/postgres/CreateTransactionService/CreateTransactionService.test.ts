@@ -10,7 +10,7 @@ import {
 import { CreateTransactionService } from './CreateTransactionService.js';
 import { container } from 'tsyringe';
 
-import { createUser } from '#/shared/utils/user-and-transaction-helper.js';
+import { createUser } from '#/shared/utils/user-helper.js';
 import { randomUUID } from 'node:crypto';
 import { AppError } from '#/shared/error/AppError.js';
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
