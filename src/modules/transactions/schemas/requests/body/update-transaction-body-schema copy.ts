@@ -12,7 +12,10 @@ export const updateTransactionBodySchema = z
 					.nonempty(ERROR_CODES.INVALID_NAME)
 					.min(3, ERROR_CODES.NAME_VERY_SHORT)
 					.max(100, ERROR_CODES.NAME_VERY_LONG)
-					.regex(/^[a-zA-ZÀ-ÿ]+$/, ERROR_CODES.INVALID_NAME)
+					.regex(
+						/^[a-zA-ZÀ-ÿ ]+([ '-][a-zA-ZÀ-ÿ ]+)*$/,
+						ERROR_CODES.INVALID_NAME
+					)
 			),
 
 		date: z.coerce.date(ERROR_CODES.INVALID_DATE),
