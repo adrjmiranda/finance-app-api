@@ -12,11 +12,9 @@ export class GetTransactionsBalanceController {
 	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
 		const userId = request.user.sub;
 
-		const { earnings, expenses, investiments, balance } =
+		const { earnings, expenses, investments, balance } =
 			await this.getTransactionsBalanceService.execute({ userId });
 
-		return reply
-			.status(200)
-			.send({ earnings, expenses, investiments, balance });
+		return reply.status(200).send({ earnings, expenses, investments, balance });
 	};
 }
