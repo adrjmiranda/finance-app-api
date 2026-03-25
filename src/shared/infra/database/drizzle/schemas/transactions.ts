@@ -51,7 +51,7 @@ export const transactionsBalanceView = pgView('transactions_balance_view', {
       SUM(CASE WHEN ${transactionsTable.type} = 'earning' THEN ${transactionsTable.amount} ELSE 0 END) as earnings,
       SUM(CASE WHEN ${transactionsTable.type} = 'expense' THEN ${transactionsTable.amount} ELSE 0 END) as expenses,
       SUM(CASE WHEN ${transactionsTable.type} = 'investment' THEN ${transactionsTable.amount} ELSE 0 END) as investments,
-      SUM(CASE WHEN ${transactionsTable.type} = 'earning' THEN ${transactionsTable.amount} ELSE -${transactionsTable.amount} END) as balance
+      SUM(CASE WHEN ${transactionsTable.type} = 'expense' THEN -${transactionsTable.amount} ELSE ${transactionsTable.amount} END) as balance
     FROM ${transactionsTable}
     GROUP BY ${transactionsTable.userId}
   `
