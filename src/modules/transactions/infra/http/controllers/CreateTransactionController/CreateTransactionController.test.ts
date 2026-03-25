@@ -11,7 +11,7 @@ import { and, eq } from 'drizzle-orm';
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
 import { randomUUID } from 'node:crypto';
 
-describe('CreateTransactionController', () => {
+describe('CreateTransactionController (Integration)', () => {
 	beforeEach(async () => {
 		await db.delete(usersTable);
 	});
