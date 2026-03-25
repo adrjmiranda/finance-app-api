@@ -34,7 +34,7 @@ O projeto implementa uma pirâmide de testes completa:
 1. Clone o repositório:
 
 ```bash
-git clone [https://github.com/adrjmiranda/finance-app-api.git](https://github.com/adrjmiranda/finance-app-api.git)
+git clone https://github.com/adrjmiranda/finance-app-api.git
 ```
 
 2. Instale as dependências:
