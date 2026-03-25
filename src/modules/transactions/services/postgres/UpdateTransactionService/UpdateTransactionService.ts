@@ -60,6 +60,10 @@ export class UpdateTransactionService {
 			.returning()
 			.execute();
 
+		if (!updatedTransaction) {
+			throw new AppError(ERROR_CODES.TRANSACTION_NOT_FOUND, 404);
+		}
+
 		return { transaction: updatedTransaction };
 	};
 }
