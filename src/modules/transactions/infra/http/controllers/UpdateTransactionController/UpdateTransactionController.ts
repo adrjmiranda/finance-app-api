@@ -1,4 +1,4 @@
-import { updateTransactionBodySchema } from '#/modules/transactions/schemas/requests/body/update-transaction-body-schema copy.js';
+import { updateTransactionBodySchema } from '#/modules/transactions/schemas/requests/body/update-transaction-body-schema.js';
 import { getTransactionParamsSchema } from '#/modules/transactions/schemas/requests/params/get-transaction-params-schema.js';
 import { UpdateTransactionService } from '#/modules/transactions/services/postgres/UpdateTransactionService/UpdateTransactionService.js';
 import type { FastifyReply, FastifyRequest } from 'fastify';
