@@ -4,6 +4,8 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
+		"test:coverage:spec": "node --import tsx --test --experimental-test-coverage ./src/**/*.spec.ts",
+		"test:coverage:test": "node --import tsx --test --experimental-test-coverage ./src/**/*.test.ts",
 		"test": "npx dotenv-cli -e .env.test -- node --import tsx --test 'src/**/*.{test,spec}.ts'",
 		"test:watch": "nodemon --watch src -e ts --exec \"npm run test\"",
 		"compose:test:up": "docker compose -f docker-compose.test.yml up -d",
