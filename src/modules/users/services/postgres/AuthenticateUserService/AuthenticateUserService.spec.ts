@@ -11,105 +11,90 @@ import { AuthenticateUserService } from './AuthenticateUserService.js';
 import { db } from '#/shared/infra/database/drizzle/db.js';
 import { AppError } from '#/shared/error/AppError.js';
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
+import { makeUser } from '#/shared/tests/factories/make-user.js';
+import { faker } from '@faker-js/faker';
 
 describe('AuthenticateUserService', () => {
-	let authenticateUserService: AuthenticateUserService;
+  let authenticateUserService: AuthenticateUserService;
 
-	beforeEach(() => {
-		const childContainer = container.createChildContainer();
-		authenticateUserService = childContainer.resolve(AuthenticateUserService);
-	});
+  beforeEach(() => {
+    const childContainer = container.createChildContainer();
+    authenticateUserService = childContainer.resolve(AuthenticateUserService);
+  });
 
-	test('should successfully authenticate a user', async (t) => {
-		const mockUser = {
-			id: 'uuid-v4',
-			firstName: 'Adriano',
-			lastName: 'Miranda',
-			email: 'adriano@email.com',
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		};
+  test('should successfully authenticate a user', async (t) => {
+    const mockUser = makeUser();
 
-		t.mock.method(db, 'select', () => ({
-			from: () => ({
-				where: () => ({
-					limit: () => Promise.resolve([mockUser]),
-				}),
-			}),
-		}));
+    t.mock.method(db, 'select', () => ({
+      from: () => ({
+        where: () => ({
+          limit: () => Promise.resolve([mockUser]),
+        }),
+      }),
+    }));
 
-		t.mock.method(bcrypt, 'compare', () => Promise.resolve(true));
+    t.mock.method(bcrypt, 'compare', () => Promise.resolve(true));
 
-		const userData = {
-			email: 'adriano@email.com',
-			password: 'password123',
-		};
+    const response = await authenticateUserService.execute({
+      email: mockUser.email,
+      password: faker.internet.password(),
+    });
 
-		const response = await authenticateUserService.execute(userData);
+    assert.ok(response.user);
+    assert.strictEqual(response.user.email, mockUser.email);
+  });
 
-		assert.ok(response.user, 'The user should have been returned');
-		assert.strictEqual(response.user.email, userData.email);
-	});
+  test('should throw an error if the user is not found', async (t) => {
+    t.mock.method(db, 'select', () => ({
+      from: () => ({
+        where: () => ({
+          limit: () => Promise.resolve([]),
+        }),
+      }),
+    }));
 
-	test('should throw an error if the user is not found', async (t) => {
-		t.mock.method(db, 'select', () => ({
-			from: () => ({
-				where: () => ({
-					limit: () => Promise.resolve([]),
-				}),
-			}),
-		}));
+    await assert.rejects(
+      async () => {
+        await authenticateUserService.execute({
+          email: faker.internet.email(),
+          password: faker.internet.password(),
+        });
+      },
+      (error: unknown) => {
+        assert.ok(error instanceof AppError);
+        assert.strictEqual(error.code, ERROR_CODES.USER_NOT_FOUND);
+        assert.strictEqual(error.status, 404);
+        return true;
+      }
+    );
+  });
 
-		const userData = {
-			email: 'adriano@email.com',
-			password: 'password123',
-		};
+  test('should throw an error if the password does not match', async (t) => {
+    const mockUser = makeUser();
 
-		await assert.rejects(
-			async () => {
-				await authenticateUserService.execute(userData);
-			},
-			(error: unknown) => {
-				assert.ok(error instanceof AppError);
-				assert.strictEqual(error.code, ERROR_CODES.USER_NOT_FOUND);
-				assert.strictEqual(error.status, 404);
-				return true;
-			}
-		);
-	});
+    t.mock.method(db, 'select', () => ({
+      from: () => ({
+        where: () => ({
+          limit: () => Promise.resolve([mockUser]),
+        }),
+      }),
+    }));
 
-	test('should throw an error if the password does not match', async (t) => {
-		const mockUser = {
-			id: 'uuid-v4',
-			email: 'adriano@email.com',
-			passwordHash: 'hashed_on_db',
-		};
+    t.mock.method(bcrypt, 'compare', () => Promise.resolve(false));
 
-		t.mock.method(db, 'select', () => ({
-			from: () => ({
-				where: () => ({
-					limit: () => Promise.resolve([mockUser]),
-				}),
-			}),
-		}));
-
-		t.mock.method(bcrypt, 'compare', () => Promise.resolve(false));
-
-		const userData = {
-			email: 'adriano@email.com',
-			password: 'password123',
-		};
-
-		await assert.rejects(
-			async () => {
-				await authenticateUserService.execute(userData);
-			},
-			(error: unknown) => {
-				assert.ok(error instanceof AppError);
-				assert.strictEqual(error.code, ERROR_CODES.INVALID_CREDENTIALS);
-				assert.strictEqual(error.status, 401);
-				return true;
-			}
-		);
-	});
+    await assert.rejects(
+      async () => {
+        await authenticateUserService.execute({
+          email: mockUser.email,
+          password: faker.internet.password(),
+        });
+      },
+      (error: unknown) => {
+        assert.ok(error instanceof AppError);
+        assert.strictEqual(error.code, ERROR_CODES.INVALID_CREDENTIALS);
+        assert.strictEqual(error.status, 401);
+        return true;
+      }
+    );
+  });
 });
