@@ -7,6 +7,7 @@ import { UpdateUserPasswordController } from '#/modules/users/infra/http/control
 
 import { VerifyJWT } from '#/shared/infra/http/middlewares/VerifyJWT.js';
 import { container } from 'tsyringe';
+import { httpRouteAdapter } from '#/shared/adapters/HttpRouteAdapter.js';
 
 export async function profileRoutes(app: FastifyInstance) {
 	app.addHook('onRequest', VerifyJWT.handle);
@@ -20,8 +21,8 @@ export async function profileRoutes(app: FastifyInstance) {
 		DeleteUserProfileController
 	);
 
-	app.get('/me', getUserProfileController.handle);
-	app.patch('/me', updateUserProfileController.handle);
-	app.patch('/me/password', updateUserPassword.handle);
-	app.delete('/me', deleteUserProfileController.handle);
+	app.get('/me', httpRouteAdapter(getUserProfileController));
+	app.patch('/me', httpRouteAdapter(updateUserProfileController));
+	app.patch('/me/password', httpRouteAdapter(updateUserPassword));
+	app.delete('/me', httpRouteAdapter(deleteUserProfileController));
 }

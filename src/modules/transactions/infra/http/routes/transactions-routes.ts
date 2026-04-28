@@ -10,6 +10,7 @@ import { ListTransactionsController } from '#/modules/transactions/infra/http/co
 import { UpdateTransactionController } from '#/modules/transactions/infra/http/controllers/UpdateTransactionController/UpdateTransactionController.js';
 import { DeleteTransactionController } from '#/modules/transactions/infra/http/controllers/DeleteTransactionController/DeleteTransactionController.js';
 import { GetTransactionsBalanceController } from '#/modules/transactions/infra/http/controllers/GetTransactionsBalanceController/GetTransactionsBalanceController.js';
+import { httpRouteAdapter } from '#/shared/adapters/HttpRouteAdapter.js';
 
 export async function transactionsRoutes(app: FastifyInstance) {
 	app.addHook('onRequest', VerifyJWT.handle);
@@ -31,10 +32,10 @@ export async function transactionsRoutes(app: FastifyInstance) {
 		GetTransactionsBalanceController
 	);
 
-	app.post('/', createTransactionController.handle);
-	app.get('/:transactionId', getTransactionController.handle);
-	app.get('/', listTransactionsController.handle);
-	app.patch('/:transactionId', updateTransactionController.handle);
-	app.delete('/:transactionId', deleteTransactionController.handle);
-	app.get('/balances', getTransactionsBalanceController.handle);
+	app.post('/', httpRouteAdapter(createTransactionController));
+	app.get('/:transactionId', httpRouteAdapter(getTransactionController));
+	app.get('/', httpRouteAdapter(listTransactionsController));
+	app.patch('/:transactionId', httpRouteAdapter(updateTransactionController));
+	app.delete('/:transactionId', httpRouteAdapter(deleteTransactionController));
+	app.get('/balances', httpRouteAdapter(getTransactionsBalanceController));
 }
