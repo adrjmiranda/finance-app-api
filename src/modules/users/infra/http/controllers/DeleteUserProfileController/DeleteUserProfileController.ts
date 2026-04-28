@@ -1,6 +1,9 @@
 import { injectable, inject } from 'tsyringe';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type {
+	IHttpRequest,
+	IHttpResponse,
+} from '#/shared/adapters/HttpRouteAdapter.js';
 
 import { deleteUserProfileBodySchema } from '#/modules/users/schemas/requests/body/delete-user-profile-body-schema.js';
 import { DeleteUserProfileService } from '#/modules/users/services/postgres/DeleteUserProfileService/DeleteUserProfileService.js';
@@ -12,15 +15,17 @@ export class DeleteUserProfileController {
 		private deleteUserProfileService: DeleteUserProfileService
 	) {}
 
-	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
-		const userId = request.user.sub;
-		const { password } = deleteUserProfileBodySchema.parse(request.body);
+	public handle = async (httpRequest: IHttpRequest): Promise<IHttpResponse> => {
+		const userId = String(httpRequest.userId);
+		const { password } = deleteUserProfileBodySchema.parse(httpRequest.body);
 
 		await this.deleteUserProfileService.execute({
 			userId,
 			password,
 		});
 
-		return reply.status(204).send();
+		return {
+			statusCode: 204,
+		};
 	};
 }

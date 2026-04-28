@@ -2,7 +2,10 @@ import { injectable, inject } from 'tsyringe';
 
 import { updateUserProfileBodySchema } from '#/modules/users/schemas/requests/body/update-user-profile-body-schema.js';
 import { UpdateUserProfileService } from '#/modules/users/services/postgres/UpdateUserProfileService/UpdateUserProfileService.js';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type {
+	IHttpRequest,
+	IHttpResponse,
+} from '#/shared/adapters/HttpRouteAdapter.js';
 
 @injectable()
 export class UpdateUserProfileController {
@@ -11,11 +14,11 @@ export class UpdateUserProfileController {
 		private updateUserProfileService: UpdateUserProfileService
 	) {}
 
-	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
-		const userId = request.user.sub;
+	public handle = async (httpRequest: IHttpRequest): Promise<IHttpResponse> => {
+		const userId = String(httpRequest.userId);
 
 		const { firstName, lastName, email } = updateUserProfileBodySchema.parse(
-			request.body
+			httpRequest.body
 		);
 
 		const { user } = await this.updateUserProfileService.execute({
@@ -25,6 +28,11 @@ export class UpdateUserProfileController {
 			email,
 		});
 
-		return reply.status(200).send({ user });
+		return {
+			statusCode: 200,
+			body: {
+				user,
+			},
+		};
 	};
 }

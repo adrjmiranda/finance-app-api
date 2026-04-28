@@ -1,6 +1,9 @@
 import { getTransactionParamsSchema } from '#/modules/transactions/schemas/requests/params/get-transaction-params-schema.js';
 import { GetTransactionService } from '#/modules/transactions/services/postgres/GetTransactionService/GetTransactionService.js';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type {
+	IHttpRequest,
+	IHttpResponse,
+} from '#/shared/adapters/HttpRouteAdapter.js';
 import { inject, injectable } from 'tsyringe';
 
 @injectable()
@@ -10,17 +13,22 @@ export class GetTransactionController {
 		private getTransactionService: GetTransactionService
 	) {}
 
-	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
-		const userId = request.user.sub;
-		const { transactionId } = getTransactionParamsSchema.parse(request.params);
+	public handle = async (httpRequest: IHttpRequest): Promise<IHttpResponse> => {
+		const userId = String(httpRequest.userId);
+		const { transactionId } = getTransactionParamsSchema.parse(
+			httpRequest.params
+		);
 
 		const { transaction } = await this.getTransactionService.execute({
 			userId,
 			transactionId,
 		});
 
-		return reply.status(200).send({
-			transaction,
-		});
+		return {
+			statusCode: 200,
+			body: {
+				transaction,
+			},
+		};
 	};
 }

@@ -2,30 +2,38 @@ import { injectable, inject } from 'tsyringe';
 
 import { authenticateBodySchema } from '#/modules/users/schemas/requests/body/authenticate-body-schema.js';
 import { AuthenticateUserService } from '#/modules/users/services/postgres/AuthenticateUserService/AuthenticateUserService.js';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type {
+	IHttpRequest,
+	IHttpResponse,
+} from '#/shared/adapters/HttpRouteAdapter.js';
+import type { ITokenProvider } from '#/shared/containers/providers/TokenProvider/models/ITokenProvider.js';
 
 @injectable()
 export class AuthenticateUserController {
 	constructor(
 		@inject(AuthenticateUserService)
-		private authenticateUserService: AuthenticateUserService
+		private authenticateUserService: AuthenticateUserService,
+
+		@inject('TokenProvider')
+		private tokenProvider: ITokenProvider
 	) {}
 
-	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
-		const { email, password } = authenticateBodySchema.parse(request.body);
+	public handle = async (httpRequest: IHttpRequest): Promise<IHttpResponse> => {
+		const { email, password } = authenticateBodySchema.parse(httpRequest.body);
 
 		const { user } = await this.authenticateUserService.execute({
 			email,
 			password,
 		});
 
-		const token = await reply.jwtSign({
-			sub: user.id,
-		});
+		const token = this.tokenProvider.generate({}, user.id, '15m');
 
-		return reply.status(200).send({
-			user,
-			token,
-		});
+		return {
+			statusCode: 200,
+			body: {
+				user,
+				token,
+			},
+		};
 	};
 }

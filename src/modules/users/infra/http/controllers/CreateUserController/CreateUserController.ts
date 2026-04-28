@@ -2,7 +2,10 @@ import { inject, injectable } from 'tsyringe';
 
 import { createUserBodySchema } from '#/modules/users/schemas/requests/body/create-user-body-schema.js';
 import { CreateUserService } from '#/modules/users/services/postgres/CreateUserService/CreateUserService.js';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type {
+	IHttpRequest,
+	IHttpResponse,
+} from '#/shared/adapters/HttpRouteAdapter.js';
 
 @injectable()
 export class CreateUserController {
@@ -10,9 +13,9 @@ export class CreateUserController {
 		@inject(CreateUserService) private createUserService: CreateUserService
 	) {}
 
-	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
+	public handle = async (httpRequest: IHttpRequest): Promise<IHttpResponse> => {
 		const { firstName, lastName, email, password } = createUserBodySchema.parse(
-			request.body
+			httpRequest.body
 		);
 
 		const { user } = await this.createUserService.execute({
@@ -22,8 +25,9 @@ export class CreateUserController {
 			password,
 		});
 
-		return reply.status(201).send({
-			user,
-		});
+		return {
+			statusCode: 201,
+			body: { user },
+		};
 	};
 }

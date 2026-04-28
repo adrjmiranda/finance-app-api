@@ -1,5 +1,8 @@
 import { ListTransactionsService } from '#/modules/transactions/services/postgres/ListTransactionsService/ListTransactionsService.js';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type {
+	IHttpRequest,
+	IHttpResponse,
+} from '#/shared/adapters/HttpRouteAdapter.js';
 import { inject, injectable } from 'tsyringe';
 
 @injectable()
@@ -9,15 +12,18 @@ export class ListTransactionsController {
 		private listTransactionsService: ListTransactionsService
 	) {}
 
-	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
-		const userId = request.user.sub;
+	public handle = async (httpRequest: IHttpRequest): Promise<IHttpResponse> => {
+		const userId = String(httpRequest.userId);
 
 		const { transactions } = await this.listTransactionsService.execute({
 			userId,
 		});
 
-		return reply.status(200).send({
-			transactions,
-		});
+		return {
+			statusCode: 200,
+			body: {
+				transactions,
+			},
+		};
 	};
 }

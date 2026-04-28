@@ -1,6 +1,9 @@
 import { inject, injectable } from 'tsyringe';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type {
+	IHttpRequest,
+	IHttpResponse,
+} from '#/shared/adapters/HttpRouteAdapter.js';
 
 import { createTransactionBodySchema } from '#/modules/transactions/schemas/requests/body/create-transaction-body-schema.js';
 import { CreateTransactionService } from '#/modules/transactions/services/postgres/CreateTransactionService/CreateTransactionService.js';
@@ -12,10 +15,10 @@ export class CreateTransactionController {
 		private createTransactionService: CreateTransactionService
 	) {}
 
-	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
-		const userId = request.user.sub;
+	public handle = async (httpRequest: IHttpRequest): Promise<IHttpResponse> => {
+		const userId = String(httpRequest.userId);
 		const { name, date, amount, type } = createTransactionBodySchema.parse(
-			request.body
+			httpRequest.body
 		);
 
 		const { transaction } = await this.createTransactionService.execute({
@@ -26,6 +29,11 @@ export class CreateTransactionController {
 			type,
 		});
 
-		return reply.status(201).send({ transaction });
+		return {
+			statusCode: 201,
+			body: {
+				transaction,
+			},
+		};
 	};
 }

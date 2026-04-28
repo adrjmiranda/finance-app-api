@@ -2,7 +2,10 @@ import { injectable, inject } from 'tsyringe';
 
 import { updateUserPasswordBodySchema } from '#/modules/users/schemas/requests/body/update-user-password-body-schema.js';
 import { UpdateUserPasswordService } from '#/modules/users/services/postgres/UpdateUserPasswordService/UpdateUserPasswordService.js';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type {
+	IHttpRequest,
+	IHttpResponse,
+} from '#/shared/adapters/HttpRouteAdapter.js';
 
 @injectable()
 export class UpdateUserPasswordController {
@@ -11,10 +14,10 @@ export class UpdateUserPasswordController {
 		private updateUserPasswordService: UpdateUserPasswordService
 	) {}
 
-	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
-		const userId = request.user.sub;
+	public handle = async (httpRequest: IHttpRequest): Promise<IHttpResponse> => {
+		const userId = String(httpRequest.userId);
 		const { oldPassword, newPassword } = updateUserPasswordBodySchema.parse(
-			request.body
+			httpRequest.body
 		);
 
 		await this.updateUserPasswordService.execute({
@@ -23,6 +26,8 @@ export class UpdateUserPasswordController {
 			newPassword,
 		});
 
-		return reply.status(204).send();
+		return {
+			statusCode: 204,
+		};
 	};
 }

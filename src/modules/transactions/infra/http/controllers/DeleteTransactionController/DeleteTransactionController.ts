@@ -1,6 +1,9 @@
 import { getTransactionParamsSchema } from '#/modules/transactions/schemas/requests/params/get-transaction-params-schema.js';
 import { DeleteTransactionService } from '#/modules/transactions/services/postgres/DeleteTransactionService/DeleteTransactionService.js';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type {
+	IHttpRequest,
+	IHttpResponse,
+} from '#/shared/adapters/HttpRouteAdapter.js';
 import { inject, injectable } from 'tsyringe';
 
 @injectable()
@@ -10,12 +13,16 @@ export class DeleteTransactionController {
 		private deleteTransactionService: DeleteTransactionService
 	) {}
 
-	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
-		const userId = request.user.sub;
-		const { transactionId } = getTransactionParamsSchema.parse(request.params);
+	public handle = async (httpRequest: IHttpRequest): Promise<IHttpResponse> => {
+		const userId = String(httpRequest.userId);
+		const { transactionId } = getTransactionParamsSchema.parse(
+			httpRequest.params
+		);
 
 		await this.deleteTransactionService.execute({ userId, transactionId });
 
-		return reply.status(204).send();
+		return {
+			statusCode: 204,
+		};
 	};
 }

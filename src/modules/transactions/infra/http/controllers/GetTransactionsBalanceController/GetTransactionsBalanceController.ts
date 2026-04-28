@@ -1,5 +1,8 @@
 import { GetTransactionsBalanceService } from '#/modules/transactions/services/postgres/GetTransactionsBalanceService/GetTransactionsBalanceService.js';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type {
+	IHttpRequest,
+	IHttpResponse,
+} from '#/shared/adapters/HttpRouteAdapter.js';
 import { inject, injectable } from 'tsyringe';
 
 @injectable()
@@ -9,12 +12,15 @@ export class GetTransactionsBalanceController {
 		private getTransactionsBalanceService: GetTransactionsBalanceService
 	) {}
 
-	public handle = async (request: FastifyRequest, reply: FastifyReply) => {
-		const userId = request.user.sub;
+	public handle = async (httpRequest: IHttpRequest): Promise<IHttpResponse> => {
+		const userId = String(httpRequest.userId);
 
 		const { earnings, expenses, investments, balance } =
 			await this.getTransactionsBalanceService.execute({ userId });
 
-		return reply.status(200).send({ earnings, expenses, investments, balance });
+		return {
+			statusCode: 200,
+			body: { earnings, expenses, investments, balance },
+		};
 	};
 }
