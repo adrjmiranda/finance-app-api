@@ -7,8 +7,6 @@ import { UpdateTransactionService } from './UpdateTransactionService.js';
 import { db } from '#/shared/infra/database/drizzle/db.js';
 import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
 
-import { randomUUID } from 'node:crypto';
-
 import { container } from 'tsyringe';
 
 import { createUserAndTransaction } from '#/shared/utils/user-and-transaction-helper.js';
@@ -16,69 +14,70 @@ import { createUserAndTransaction } from '#/shared/utils/user-and-transaction-he
 import { AppError } from '#/shared/error/AppError.js';
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
 
-import { type TRANSACTION_TYPES } from '#/shared/infra/database/drizzle/schemas/transactions.js';
+import { TRANSACTION_TYPES } from '#/shared/infra/database/drizzle/schemas/transactions.js';
+import { faker } from '@faker-js/faker';
 
 describe('UpdateTransactionService (Integration)', () => {
-	let updateTransactionService: UpdateTransactionService;
+  let updateTransactionService: UpdateTransactionService;
 
-	beforeEach(async () => {
-		await db.delete(usersTable);
+  beforeEach(async () => {
+    await db.delete(usersTable);
 
-		const childContainer = container.createChildContainer();
-		updateTransactionService = childContainer.resolve(UpdateTransactionService);
-	});
+    const childContainer = container.createChildContainer();
+    updateTransactionService = childContainer.resolve(UpdateTransactionService);
+  });
 
-	test('should update a transaction', async () => {
-		const { user, transaction } = await createUserAndTransaction();
+  test('should update a transaction', async () => {
+    const { user, transaction } = await createUserAndTransaction();
 
-		const executeArguments = {
-			userId: user?.id ?? '',
-			transactionId: transaction?.id ?? '',
-			name: 'Updated Transaction',
-			date: new Date(),
-			amount: 200.0,
-			type: 'expense' as (typeof TRANSACTION_TYPES)[number],
-		};
+    const transactionDataToUpdate = {
+      userId: user?.id ?? '',
+      transactionId: transaction?.id ?? '',
+      name: faker.string.alphanumeric(),
+      date: new Date(),
+      amount: Number(faker.number.float({ fractionDigits: 2 })),
+      type: faker.helpers.arrayElement(TRANSACTION_TYPES),
+    };
 
-		const { transaction: updatedTransaction } =
-			await updateTransactionService.execute({ ...executeArguments });
+    const { transaction: updatedTransaction } =
+      await updateTransactionService.execute({ ...transactionDataToUpdate });
 
-		assert.ok(updatedTransaction);
-		assert.strictEqual(updatedTransaction.id, transaction?.id);
-		assert.strictEqual(updatedTransaction.userId, transaction?.userId);
-		assert.strictEqual(updatedTransaction.name, executeArguments.name);
-		assert.strictEqual(
-			Number(updatedTransaction.amount),
-			executeArguments.amount
-		);
-		assert.strictEqual(
-			updatedTransaction.date.toISOString(),
-			executeArguments.date.toISOString()
-		);
-	});
+    assert.ok(updatedTransaction);
+    assert.strictEqual(updatedTransaction.id, transaction?.id);
+    assert.strictEqual(updatedTransaction.userId, transaction?.userId);
+    assert.strictEqual(updatedTransaction.name, transactionDataToUpdate.name);
+    assert.strictEqual(
+      Number(updatedTransaction.amount),
+      transactionDataToUpdate.amount
+    );
+    assert.strictEqual(
+      updatedTransaction.date.toISOString(),
+      transactionDataToUpdate.date.toISOString()
+    );
+  });
 
-	test('should throw an error if user is not found', async () => {
-		const { transaction } = await createUserAndTransaction();
+  test('should throw an error if user is not found', async () => {
+    const { transaction } = await createUserAndTransaction();
 
-		const executeArguments = {
-			userId: randomUUID(),
-			transactionId: transaction?.id ?? '',
-			name: 'Updated Transaction',
-			date: new Date(),
-			amount: 200.0,
-			type: 'expense' as (typeof TRANSACTION_TYPES)[number],
-		};
+    const transactionDataToUpdate = {
+      userId: faker.string.uuid(),
+      transactionId: transaction?.id ?? '',
+      name: faker.string.alphanumeric(),
+      date: new Date(),
+      amount: Number(faker.number.float({ fractionDigits: 2 })),
+      type: faker.helpers.arrayElement(TRANSACTION_TYPES),
+    };
 
-		await assert.rejects(
-			async () => {
-				await updateTransactionService.execute({ ...executeArguments });
-			},
-			(error: unknown) => {
-				assert.ok(error instanceof AppError);
-				assert.strictEqual(error.code, ERROR_CODES.USER_NOT_FOUND);
-				assert.strictEqual(error.status, 404);
-				return true;
-			}
-		);
-	});
+    await assert.rejects(
+      async () => {
+        await updateTransactionService.execute({ ...transactionDataToUpdate });
+      },
+      (error: unknown) => {
+        assert.ok(error instanceof AppError);
+        assert.strictEqual(error.code, ERROR_CODES.USER_NOT_FOUND);
+        assert.strictEqual(error.status, 404);
+        return true;
+      }
+    );
+  });
 });
