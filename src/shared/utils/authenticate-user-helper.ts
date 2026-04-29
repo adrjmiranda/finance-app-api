@@ -1,38 +1,26 @@
 import type { FastifyInstance } from 'fastify';
 
-import bcrypt from 'bcrypt';
-import { db } from '#/shared/infra/database/drizzle/db.js';
-import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
+import { createUser } from './user-helper.js';
+import { faker } from '@faker-js/faker';
 
 export async function createAndAuthenticateUser(app: FastifyInstance) {
-	const password = 'password123';
-	const passwordHash = await bcrypt.hash(password, 10);
+  const password = faker.internet.password();
+  const { user } = await createUser({ password });
 
-	const [user] = await db
-		.insert(usersTable)
-		.values({
-			firstName: 'Test',
-			lastName: 'User',
-			email: `test-${Date.now()}@example.com`,
-			passwordHash,
-		})
-		.returning()
-		.execute();
+  const response = await app.inject({
+    method: 'POST',
+    url: '/users/sessions',
+    payload: {
+      email: user?.email,
+      password,
+    },
+  });
 
-	const response = await app.inject({
-		method: 'POST',
-		url: '/users/sessions',
-		payload: {
-			email: user?.email,
-			password,
-		},
-	});
+  const body = JSON.parse(response.payload);
 
-	const body = JSON.parse(response.payload);
-
-	return {
-		token: body.token as string,
-		authenticatedUser: user,
-		password,
-	};
+  return {
+    token: body.token as string,
+    authenticatedUser: user,
+    password,
+  };
 }

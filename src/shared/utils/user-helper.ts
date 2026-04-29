@@ -1,21 +1,30 @@
 import bcrypt from 'bcrypt';
 import { db } from '#/shared/infra/database/drizzle/db.js';
 import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
+import { faker } from '@faker-js/faker';
 
-export async function createUser() {
-	const password = 'password123';
-	const passwordHash = await bcrypt.hash(password, 10);
+interface ICreateUserData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}
 
-	const [user] = await db
-		.insert(usersTable)
-		.values({
-			firstName: 'Test',
-			lastName: 'User',
-			email: 'integration@test.com',
-			passwordHash,
-		})
-		.returning()
-		.execute();
+export async function createUser(override: Partial<ICreateUserData> = {}) {
+  const password = faker.internet.password();
+  const passwordHash = await bcrypt.hash(password, 10);
 
-	return { user };
+  const [user] = await db
+    .insert(usersTable)
+    .values({
+      ...override,
+      firstName: faker.person.firstName(),
+      lastName: faker.person.lastName(),
+      email: faker.internet.email(),
+      passwordHash,
+    })
+    .returning()
+    .execute();
+
+  return { user };
 }

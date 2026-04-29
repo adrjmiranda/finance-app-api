@@ -1,36 +1,27 @@
-import bcrypt from 'bcrypt';
 import { db } from '#/shared/infra/database/drizzle/db.js';
-import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
-import { transactionsTable } from '../infra/database/drizzle/schemas/transactions.js';
+import {
+  TRANSACTION_TYPES,
+  transactionsTable,
+} from '#/shared/infra/database/drizzle/schemas/transactions.js';
+import { faker } from '@faker-js/faker';
+import { createUser } from './user-helper.js';
 
 export async function createUserAndTransaction() {
-	const password = 'password123';
-	const passwordHash = await bcrypt.hash(password, 10);
+  const { user } = await createUser();
 
-	const [user] = await db
-		.insert(usersTable)
-		.values({
-			firstName: 'Test',
-			lastName: 'User',
-			email: 'integration@test.com',
-			passwordHash,
-		})
-		.returning()
-		.execute();
+  const [transaction] = user
+    ? await db
+        .insert(transactionsTable)
+        .values({
+          userId: user.id,
+          name: faker.string.alphanumeric(),
+          date: new Date(),
+          amount: String(faker.number.float({ fractionDigits: 2 })),
+          type: faker.helpers.arrayElement(TRANSACTION_TYPES),
+        })
+        .returning()
+        .execute()
+    : [undefined];
 
-	const [transaction] = user
-		? await db
-				.insert(transactionsTable)
-				.values({
-					userId: user.id,
-					name: 'Test Transaction',
-					date: new Date(),
-					amount: String(100.0),
-					type: 'earning',
-				})
-				.returning()
-				.execute()
-		: [undefined];
-
-	return { user, transaction };
+  return { user, transaction };
 }
