@@ -7,46 +7,51 @@ import { db } from '#/shared/infra/database/drizzle/db.js';
 import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
 import { container } from 'tsyringe';
 import bcrypt from 'bcrypt';
+import { faker } from '@faker-js/faker';
 
 describe('UpdateUserProfileService (Integration)', async () => {
-	let updateUserProfileService: UpdateUserProfileService;
+  let updateUserProfileService: UpdateUserProfileService;
 
-	beforeEach(async () => {
-		await db.delete(usersTable);
+  beforeEach(async () => {
+    await db.delete(usersTable);
 
-		const childContainer = container.createChildContainer();
-		updateUserProfileService = childContainer.resolve(UpdateUserProfileService);
-	});
+    const childContainer = container.createChildContainer();
+    updateUserProfileService = childContainer.resolve(UpdateUserProfileService);
+  });
 
-	test('should update the user profile', async () => {
-		const firstName = 'Adriano';
-		const lastName = 'Miranda';
-		const email = 'update@test.com';
-		const password = 'password123';
+  test('should update the user profile', async () => {
+    const firstName = faker.person.firstName();
+    const lastName = faker.person.lastName();
+    const email = faker.internet.email();
+    const password = faker.internet.password();
 
-		const passwordHash = await bcrypt.hash(password, 10);
+    const passwordHash = await bcrypt.hash(password, 10);
 
-		const [createdUser] = await db
-			.insert(usersTable)
-			.values({
-				firstName,
-				lastName,
-				email,
-				passwordHash,
-			})
-			.returning()
-			.execute();
+    const [createdUser] = await db
+      .insert(usersTable)
+      .values({
+        firstName,
+        lastName,
+        email,
+        passwordHash,
+      })
+      .returning()
+      .execute();
 
-		const { user: updatedUser } = await updateUserProfileService.execute({
-			userId: createdUser?.id ?? 'not-found',
-			firstName: 'New First Name',
-			lastName: 'New Last Name',
-			email: 'new-email@test.com',
-		});
+    const userDataToUpdate = {
+      firstName: faker.person.firstName(),
+      lastName: faker.person.lastName(),
+      email: faker.internet.email(),
+    };
 
-		assert.ok(updatedUser?.id);
-		assert.strictEqual(updatedUser.firstName, 'New First Name');
-		assert.strictEqual(updatedUser.lastName, 'New Last Name');
-		assert.strictEqual(updatedUser.email, 'new-email@test.com');
-	});
+    const { user: updatedUser } = await updateUserProfileService.execute({
+      userId: createdUser?.id ?? 'not-found',
+      ...userDataToUpdate,
+    });
+
+    assert.ok(updatedUser?.id);
+    assert.strictEqual(updatedUser.firstName, userDataToUpdate.firstName);
+    assert.strictEqual(updatedUser.lastName, userDataToUpdate.lastName);
+    assert.strictEqual(updatedUser.email, userDataToUpdate.email);
+  });
 });
