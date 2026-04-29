@@ -5,74 +5,66 @@ import assert from 'node:assert';
 import { GetTransactionsBalanceService } from './GetTransactionsBalanceService.js';
 import { container } from 'tsyringe';
 import { db } from '#/shared/infra/database/drizzle/db.js';
-import { randomUUID } from 'node:crypto';
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
 import { AppError } from '#/shared/error/AppError.js';
+import { makeBalance } from '#/shared/tests/factories/make-transaction.js';
+import { faker } from '@faker-js/faker';
 
 describe('GetTransactionsBalanceService', () => {
-	let getTransactionBalanceService: GetTransactionsBalanceService;
+  let getTransactionBalanceService: GetTransactionsBalanceService;
 
-	beforeEach(() => {
-		const childContainer = container.createChildContainer();
-		getTransactionBalanceService = childContainer.resolve(
-			GetTransactionsBalanceService
-		);
-	});
+  beforeEach(() => {
+    const childContainer = container.createChildContainer();
+    getTransactionBalanceService = childContainer.resolve(
+      GetTransactionsBalanceService
+    );
+  });
 
-	test('should get transactions balance', async (t) => {
-		const userId = randomUUID();
+  test('should get transactions balance', async (t) => {
+    const mockTransactionBalance = makeBalance();
 
-		const mockEarnings = 159;
-		const mockExpenses = 200;
-		const mockInvestments = 525;
+    t.mock.method(db, 'select', () => ({
+      from: () => ({
+        where: () => ({
+          limit: () => Promise.resolve([true]),
+          execute: () => Promise.resolve([mockTransactionBalance]),
+        }),
+      }),
+    }));
 
-		const mockTransactionBalance = {
-			earnings: mockEarnings,
-			expenses: mockExpenses,
-			investments: mockInvestments,
-			balance: mockEarnings - mockExpenses - mockInvestments,
-		};
+    const { balance, earnings, expenses, investments } =
+      await getTransactionBalanceService.execute({
+        userId: faker.string.uuid(),
+      });
 
-		t.mock.method(db, 'select', () => ({
-			from: () => ({
-				where: () => ({
-					limit: () => Promise.resolve([true]),
-					execute: () => Promise.resolve([mockTransactionBalance]),
-				}),
-			}),
-		}));
+    assert.strictEqual(Number(mockTransactionBalance.expenses), expenses);
+    assert.strictEqual(Number(mockTransactionBalance.earnings), earnings);
+    assert.strictEqual(Number(mockTransactionBalance.investments), investments);
+    assert.strictEqual(Number(mockTransactionBalance.balance), balance);
+  });
 
-		const { balance, earnings, expenses, investments } =
-			await getTransactionBalanceService.execute({ userId });
+  test('should throw an error if user is not found', async (t) => {
+    t.mock.method(db, 'select', () => ({
+      from: () => ({
+        where: () => ({
+          limit: () => Promise.resolve([]),
+          execute: () => Promise.resolve([true]),
+        }),
+      }),
+    }));
 
-		assert.strictEqual(mockTransactionBalance.earnings, earnings);
-		assert.strictEqual(mockTransactionBalance.expenses, expenses);
-		assert.strictEqual(mockTransactionBalance.investments, investments);
-		assert.strictEqual(mockTransactionBalance.balance, balance);
-	});
-
-	test('should throw an error if user is not found', async (t) => {
-		const userId = randomUUID();
-
-		t.mock.method(db, 'select', () => ({
-			from: () => ({
-				where: () => ({
-					limit: () => Promise.resolve([]),
-					execute: () => Promise.resolve([true]),
-				}),
-			}),
-		}));
-
-		await assert.rejects(
-			async () => {
-				await getTransactionBalanceService.execute({ userId });
-			},
-			(error: unknown) => {
-				assert.ok(error instanceof AppError);
-				assert.strictEqual(error.code, ERROR_CODES.USER_NOT_FOUND);
-				assert.strictEqual(error.status, 404);
-				return true;
-			}
-		);
-	});
+    await assert.rejects(
+      async () => {
+        await getTransactionBalanceService.execute({
+          userId: faker.string.uuid(),
+        });
+      },
+      (error: unknown) => {
+        assert.ok(error instanceof AppError);
+        assert.strictEqual(error.code, ERROR_CODES.USER_NOT_FOUND);
+        assert.strictEqual(error.status, 404);
+        return true;
+      }
+    );
+  });
 });
