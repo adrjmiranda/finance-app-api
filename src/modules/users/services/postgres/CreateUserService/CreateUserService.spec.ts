@@ -18,6 +18,7 @@ describe('CreateUserService', () => {
   let createUserService: CreateUserService;
 
   beforeEach(() => {
+    container.clearInstances();
     const childContainer = container.createChildContainer();
     createUserService = childContainer.resolve(CreateUserService);
   });

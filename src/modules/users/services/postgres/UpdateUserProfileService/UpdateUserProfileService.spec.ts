@@ -15,6 +15,7 @@ describe('UpdateUserProfileService', () => {
   let updateUserProfileService: UpdateUserProfileService;
 
   beforeEach(() => {
+    container.clearInstances();
     const childContainer = container.createChildContainer();
     updateUserProfileService = childContainer.resolve(UpdateUserProfileService);
   });

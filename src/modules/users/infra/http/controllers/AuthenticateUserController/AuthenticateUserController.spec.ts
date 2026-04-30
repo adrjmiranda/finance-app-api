@@ -26,6 +26,7 @@ describe('AuthenticateUserController', () => {
   };
 
   beforeEach(() => {
+    container.clearInstances();
     const childContainer = container.createChildContainer();
 
     authenticateUserService = {

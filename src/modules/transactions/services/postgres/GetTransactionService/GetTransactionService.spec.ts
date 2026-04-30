@@ -14,6 +14,7 @@ describe('GetTransactionService', () => {
   let getTransactionService: GetTransactionService;
 
   beforeEach(() => {
+    container.clearInstances();
     const childContainer = container.createChildContainer();
     getTransactionService = childContainer.resolve(GetTransactionService);
   });

@@ -14,6 +14,7 @@ describe('GetUserProfileService', () => {
   let getUserProfileService: GetUserProfileService;
 
   beforeEach(() => {
+    container.clearInstances();
     const childContainer = container.createChildContainer();
     getUserProfileService = childContainer.resolve(GetUserProfileService);
   });

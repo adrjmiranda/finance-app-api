@@ -14,6 +14,7 @@ describe('DeleteTransactionService', () => {
   let deleteTransactionService: DeleteTransactionService;
 
   beforeEach(() => {
+    container.clearInstances();
     const childContainer = container.createChildContainer();
     deleteTransactionService = childContainer.resolve(DeleteTransactionService);
   });

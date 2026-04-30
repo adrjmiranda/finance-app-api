@@ -13,6 +13,7 @@ describe('UpdateTransactionService', () => {
   let updateTransactionService: UpdateTransactionService;
 
   beforeEach(() => {
+    container.clearInstances();
     const childContainer = container.createChildContainer();
     updateTransactionService = childContainer.resolve(UpdateTransactionService);
   });

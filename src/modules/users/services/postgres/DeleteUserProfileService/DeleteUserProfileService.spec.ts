@@ -16,6 +16,7 @@ describe('DeleteUserProfileService', () => {
   let deleteUserProfileService: DeleteUserProfileService;
 
   beforeEach(() => {
+    container.clearInstances();
     const childContainer = container.createChildContainer();
     deleteUserProfileService = childContainer.resolve(DeleteUserProfileService);
   });

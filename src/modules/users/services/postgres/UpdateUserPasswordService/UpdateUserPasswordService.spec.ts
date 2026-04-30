@@ -15,6 +15,7 @@ describe('UpdateUserPasswordService', () => {
   let updateUserPasswordService: UpdateUserPasswordService;
 
   beforeEach(() => {
+    container.clearInstances();
     const childContainer = container.createChildContainer();
     updateUserPasswordService = childContainer.resolve(
       UpdateUserPasswordService
