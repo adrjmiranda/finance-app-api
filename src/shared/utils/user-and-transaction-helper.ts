@@ -14,7 +14,7 @@ export async function createUserAndTransaction() {
         .insert(transactionsTable)
         .values({
           userId: user.id,
-          name: faker.string.alphanumeric(),
+          name: faker.string.alphanumeric(20),
           date: new Date(),
           amount: String(faker.number.float({ fractionDigits: 2 })),
           type: faker.helpers.arrayElement(TRANSACTION_TYPES),

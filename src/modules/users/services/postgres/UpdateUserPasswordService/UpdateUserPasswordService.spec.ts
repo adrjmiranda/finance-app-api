@@ -42,7 +42,7 @@ describe('UpdateUserPasswordService', () => {
 
     t.mock.method(bcrypt, 'compare', () => Promise.resolve(true));
     t.mock.method(bcrypt, 'hash', () =>
-      Promise.resolve(faker.string.alphanumeric())
+      Promise.resolve(faker.string.alphanumeric(20))
     );
 
     await assert.doesNotReject(async () => {

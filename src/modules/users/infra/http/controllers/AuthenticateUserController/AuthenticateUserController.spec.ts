@@ -6,35 +6,44 @@ import { AuthenticateUserController } from './AuthenticateUserController.js';
 import { AuthenticateUserService } from '#/modules/users/services/postgres/AuthenticateUserService/AuthenticateUserService.js';
 import { container } from 'tsyringe';
 import { authenticateBodySchema } from '#/modules/users/schemas/requests/body/authenticate-body-schema.js';
-import {
-  createMockReply,
-  createMockRequest,
-} from '#/test/utils/fastify-mock.js';
+import { createMockHttpRequest } from '#/test/utils/http-mock.js';
+import type { ITokenProvider } from '#/shared/containers/providers/TokenProvider/models/ITokenProvider.js';
+import { faker } from '@faker-js/faker';
 
 describe('AuthenticateUserController', () => {
   let authenticateUserController: AuthenticateUserController;
   let authenticateUserService: AuthenticateUserService;
 
+  let tokenProvider: ITokenProvider;
+
+  const userData = {
+    id: faker.string.uuid(),
+    firstName: faker.person.firstName(),
+    lastName: faker.person.lastName(),
+    email: faker.internet.email(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
   beforeEach(() => {
     const childContainer = container.createChildContainer();
 
     authenticateUserService = {
-      execute: async () => ({
-        user: {
-          id: 'uuid-v4',
-          firstName: 'Adriano',
-          lastName: 'Miranda',
-          email: 'adriano@email.com',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      }),
+      execute: async () => ({ user: userData }),
     } as AuthenticateUserService;
+
+    childContainer.registerInstance('TokenProvider', {
+      generate: () => {},
+      verify: () => {},
+    });
 
     childContainer.registerInstance(
       AuthenticateUserService,
       authenticateUserService
     );
+
+    tokenProvider = childContainer.resolve<ITokenProvider>('TokenProvider');
+
     authenticateUserController = childContainer.resolve(
       AuthenticateUserController
     );
@@ -42,51 +51,36 @@ describe('AuthenticateUserController', () => {
 
   test('should authenticate a user', async (t) => {
     const userPayload = {
-      email: 'adriano@email.com',
-      password: 'password123',
+      email: userData.email,
+      password: faker.internet.password(),
     };
 
-    const mockRequest = createMockRequest({
-      body: userPayload,
-    });
-    const mockReply = createMockReply(t);
+    const mockHttpRequest = createMockHttpRequest();
 
-    const mockToken = 'mocked-jwt-token';
-    mockReply.jwtSign = t.mock.fn(async () => mockToken);
-
-    const userData = {
-      id: 'uuid-v4',
-      firstName: 'Adriano',
-      lastName: 'Miranda',
-      email: 'adriano@email.com',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    const mockToken = faker.string.alphanumeric(32);
+    t.mock.method(tokenProvider, 'generate', () => mockToken);
 
     t.mock.method(authenticateBodySchema, 'parse', () => userPayload);
-    t.mock.method(authenticateUserService, 'execute', async () => ({
-      user: userData,
-    }));
 
-    await authenticateUserController.handle(mockRequest, mockReply);
+    const response = await authenticateUserController.handle(mockHttpRequest);
 
-    assert.strictEqual(mockReply.status.mock.calls[0]?.arguments[0], 200);
-    assert.deepStrictEqual(mockReply.send.mock.calls[0]?.arguments[0], {
-      user: userData,
-      token: mockToken,
-    });
+    const { user, token } = response.body as {
+      user: typeof userData;
+      token: string;
+    };
+
+    assert.strictEqual(response.statusCode, 200);
+    assert.deepStrictEqual(user, userData);
+    assert.strictEqual(token, mockToken);
   });
 
   test('should throw an error if service fails', async (t) => {
     const userPayload = {
-      email: 'adriano@email.com',
-      password: 'password123',
+      email: userData.email,
+      password: faker.internet.password(),
     };
 
-    const mockRequest = createMockRequest({
-      body: userPayload,
-    });
-    const mockReply = createMockReply(t);
+    const mockHttpRequest = createMockHttpRequest();
 
     t.mock.method(authenticateBodySchema, 'parse', () => userPayload);
 
@@ -96,7 +90,7 @@ describe('AuthenticateUserController', () => {
 
     await assert.rejects(
       async () => {
-        await authenticateUserController.handle(mockRequest, mockReply);
+        await authenticateUserController.handle(mockHttpRequest);
       },
       {
         name: 'Error',
@@ -106,10 +100,7 @@ describe('AuthenticateUserController', () => {
   });
 
   test('should throw an error if body is invalid', async (t) => {
-    const mockRequest = createMockRequest({
-      body: {},
-    });
-    const mockReply = createMockReply(t);
+    const mockHttpRequest = createMockHttpRequest();
 
     t.mock.method(authenticateBodySchema, 'parse', () => {
       throw new Error('Validation error');
@@ -117,7 +108,7 @@ describe('AuthenticateUserController', () => {
 
     await assert.rejects(
       async () => {
-        await authenticateUserController.handle(mockRequest, mockReply);
+        await authenticateUserController.handle(mockHttpRequest);
       },
       {
         name: 'Error',

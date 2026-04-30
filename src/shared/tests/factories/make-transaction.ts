@@ -14,7 +14,7 @@ export function makeTransaction(
   const defaults = {
     id: faker.string.uuid(),
     userId: faker.string.uuid(),
-    name: faker.string.alphanumeric(),
+    name: faker.string.alphanumeric(20),
     date: new Date(),
     amount: faker.number.float({ fractionDigits: 2 }).toString(),
     type: faker.helpers.arrayElement(TRANSACTION_TYPES),

@@ -33,7 +33,7 @@ describe('UpdateTransactionService (Integration)', () => {
     const transactionDataToUpdate = {
       userId: user?.id ?? '',
       transactionId: transaction?.id ?? '',
-      name: faker.string.alphanumeric(),
+      name: faker.string.alphanumeric(20),
       date: new Date(),
       amount: Number(faker.number.float({ fractionDigits: 2 })),
       type: faker.helpers.arrayElement(TRANSACTION_TYPES),
@@ -62,7 +62,7 @@ describe('UpdateTransactionService (Integration)', () => {
     const transactionDataToUpdate = {
       userId: faker.string.uuid(),
       transactionId: transaction?.id ?? '',
-      name: faker.string.alphanumeric(),
+      name: faker.string.alphanumeric(20),
       date: new Date(),
       amount: Number(faker.number.float({ fractionDigits: 2 })),
       type: faker.helpers.arrayElement(TRANSACTION_TYPES),
