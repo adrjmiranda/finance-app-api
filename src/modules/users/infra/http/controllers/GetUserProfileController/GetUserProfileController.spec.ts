@@ -5,10 +5,8 @@ import assert from 'node:assert';
 import { GetUserProfileController } from './GetUserProfileController.js';
 import { GetUserProfileService } from '#/modules/users/services/postgres/GetUserProfileService/GetUserProfileService.js';
 import { container } from 'tsyringe';
-import {
-  createMockReply,
-  createMockRequest,
-} from '#/test/utils/fastify-mock.js';
+import { createMockHttpRequest } from '#/test/utils/http-mock.js';
+import { faker } from '@faker-js/faker';
 
 describe('GetUserProfileController', () => {
   let getUserProfileController: GetUserProfileController;
@@ -39,12 +37,9 @@ describe('GetUserProfileController', () => {
   });
 
   test('should get the user profile', async (t) => {
-    const mockRequest = createMockRequest({
-      user: {
-        sub: 'uuid-v4',
-      },
+    const mockHttpRequest = createMockHttpRequest({
+      userId: faker.string.uuid(),
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(getUserProfileService, 'execute', async () => ({
       user: {
@@ -52,18 +47,13 @@ describe('GetUserProfileController', () => {
       },
     }));
 
-    await getUserProfileController.handle(mockRequest, mockReply);
+    const response = await getUserProfileController.handle(mockHttpRequest);
 
-    assert.strictEqual(mockReply.status.mock.calls[0]?.arguments[0], 200);
+    assert.strictEqual(response.statusCode, 200);
   });
 
   test('should throw an error if service fails', async (t) => {
-    const mockRequest = createMockRequest({
-      user: {
-        sub: 'uuid-v4',
-      },
-    });
-    const mockReply = createMockReply(t);
+    const mockHttpRequest = createMockHttpRequest();
 
     t.mock.method(getUserProfileService, 'execute', async () => {
       throw new Error('Service error');
@@ -71,7 +61,7 @@ describe('GetUserProfileController', () => {
 
     await assert.rejects(
       async () => {
-        await getUserProfileController.handle(mockRequest, mockReply);
+        await getUserProfileController.handle(mockHttpRequest);
       },
       {
         name: 'Error',
