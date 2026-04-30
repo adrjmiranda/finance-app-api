@@ -5,11 +5,10 @@ import assert from 'node:assert';
 import { DeleteUserProfileController } from './DeleteUserProfileController.js';
 import { DeleteUserProfileService } from '#/modules/users/services/postgres/DeleteUserProfileService/DeleteUserProfileService.js';
 import { container } from 'tsyringe';
-import {
-  createMockReply,
-  createMockRequest,
-} from '#/test/utils/fastify-mock.js';
+
 import { deleteUserProfileBodySchema } from '#/modules/users/schemas/requests/body/delete-user-profile-body-schema.js';
+import { createMockHttpRequest } from '#/test/utils/http-mock.js';
+import { faker } from '@faker-js/faker/locale/uk';
 
 describe('DeleteUserProfileController', () => {
   let deleteUserProfileController: DeleteUserProfileController;
@@ -34,38 +33,29 @@ describe('DeleteUserProfileController', () => {
 
   test('should delete the user profile', async (t) => {
     const userPayload = {
-      password: 'password123',
+      password: faker.internet.password(),
     };
 
-    const mockRequest = createMockRequest({
+    const mockHttpRequest = createMockHttpRequest({
       body: userPayload,
-      user: {
-        sub: 'uuid-v4',
-      },
+      userId: faker.string.uuid(),
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(deleteUserProfileBodySchema, 'parse', () => userPayload);
 
     t.mock.method(deleteUserProfileService, 'execute', async () => {});
 
-    await deleteUserProfileController.handle(mockRequest, mockReply);
+    const response = await deleteUserProfileController.handle(mockHttpRequest);
 
-    assert.strictEqual(mockReply.status.mock.calls[0]?.arguments[0], 204);
+    assert.strictEqual(response.statusCode, 204);
   });
 
   test('should throw an error if service fails', async (t) => {
     const userPayload = {
-      password: 'password123',
+      password: faker.internet.password(),
     };
 
-    const mockRequest = createMockRequest({
-      body: userPayload,
-      user: {
-        sub: 'uuid-v4',
-      },
-    });
-    const mockReply = createMockReply(t);
+    const mockHttpRequest = createMockHttpRequest();
 
     t.mock.method(deleteUserProfileBodySchema, 'parse', () => userPayload);
     t.mock.method(deleteUserProfileService, 'execute', async () => {
@@ -74,7 +64,7 @@ describe('DeleteUserProfileController', () => {
 
     await assert.rejects(
       async () => {
-        await deleteUserProfileController.handle(mockRequest, mockReply);
+        await deleteUserProfileController.handle(mockHttpRequest);
       },
       {
         name: 'Error',
@@ -84,13 +74,7 @@ describe('DeleteUserProfileController', () => {
   });
 
   test('should throw an error if body is invalid', async (t) => {
-    const mockRequest = createMockRequest({
-      body: {},
-      user: {
-        sub: 'uuid-v4',
-      },
-    });
-    const mockReply = createMockReply(t);
+    const mockHttpRequest = createMockHttpRequest();
 
     t.mock.method(deleteUserProfileBodySchema, 'parse', () => {
       throw new Error('Validation error');
@@ -98,7 +82,7 @@ describe('DeleteUserProfileController', () => {
 
     await assert.rejects(
       async () => {
-        await deleteUserProfileController.handle(mockRequest, mockReply);
+        await deleteUserProfileController.handle(mockHttpRequest);
       },
       {
         name: 'Error',
