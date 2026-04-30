@@ -4,12 +4,11 @@ import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
 import { UpdateUserProfileController } from './UpdateUserProfileController.js';
 import { container } from 'tsyringe';
-import {
-  createMockReply,
-  createMockRequest,
-} from '#/test/utils/fastify-mock.js';
+
 import { updateUserProfileBodySchema } from '#/modules/users/schemas/requests/body/update-user-profile-body-schema.js';
 import { UpdateUserProfileService } from '#/modules/users/services/postgres/UpdateUserProfileService/UpdateUserProfileService.js';
+import { faker } from '@faker-js/faker';
+import { createMockHttpRequest } from '#/test/utils/http-mock.js';
 
 describe('UpdateUserProfileController', () => {
   let updateUserProfileController: UpdateUserProfileController;
@@ -36,54 +35,47 @@ describe('UpdateUserProfileController', () => {
 
   test('should update user profile', async (t) => {
     const userPayload = {
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john.doe@example.com',
+      firstName: faker.person.firstName(),
+      lastName: faker.person.lastName(),
+      email: faker.internet.email(),
     };
 
     const userData = {
+      id: faker.string.uuid(),
       ...userPayload,
-      id: 'uuid-v4',
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    const mockRequest = createMockRequest({
-      body: { ...userPayload },
-      user: {
-        sub: 'uuid-v4',
-      },
+    const mockHttpRequest = createMockHttpRequest({
+      body: userPayload,
+      userId: faker.string.uuid(),
     });
-
-    const mockReply = createMockReply(t);
 
     t.mock.method(updateUserProfileBodySchema, 'parse', () => userPayload);
     t.mock.method(updateUserProfileService, 'execute', async () => ({
       user: userData,
     }));
 
-    await updateUserProfileController.handle(mockRequest, mockReply);
+    const response = await updateUserProfileController.handle(mockHttpRequest);
 
-    assert.strictEqual(mockReply.status.mock.calls[0]?.arguments[0], 200);
-    assert.deepStrictEqual(mockReply.send.mock.calls[0]?.arguments[0], {
-      user: userData,
-    });
+    const { user } = response.body as { user: typeof userData };
+
+    assert.strictEqual(response.statusCode, 200);
+    assert.deepStrictEqual(user, userData);
   });
 
   test('should throw an error if service fails', async (t) => {
     const userPayload = {
-      firstName: 'Adriano',
-      lastName: 'Miranda',
-      email: 'adriano@email.com',
+      firstName: faker.person.firstName(),
+      lastName: faker.person.lastName(),
+      email: faker.internet.email(),
     };
 
-    const mockRequest = createMockRequest({
+    const mockHttpRequest = createMockHttpRequest({
       body: userPayload,
-      user: {
-        sub: 'uuid-v4',
-      },
+      userId: faker.string.uuid(),
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(updateUserProfileBodySchema, 'parse', () => userPayload);
 
@@ -93,7 +85,7 @@ describe('UpdateUserProfileController', () => {
 
     await assert.rejects(
       async () => {
-        await updateUserProfileController.handle(mockRequest, mockReply);
+        await updateUserProfileController.handle(mockHttpRequest);
       },
       {
         name: 'Error',
@@ -103,13 +95,10 @@ describe('UpdateUserProfileController', () => {
   });
 
   test('should throw an error if body is invalid', async (t) => {
-    const mockRequest = createMockRequest({
+    const mockHttpRequest = createMockHttpRequest({
       body: {},
-      user: {
-        sub: 'uuid-v4',
-      },
+      userId: faker.string.uuid(),
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(updateUserProfileBodySchema, 'parse', () => {
       throw new Error('Validation error');
@@ -117,7 +106,7 @@ describe('UpdateUserProfileController', () => {
 
     await assert.rejects(
       async () => {
-        await updateUserProfileController.handle(mockRequest, mockReply);
+        await updateUserProfileController.handle(mockHttpRequest);
       },
       {
         name: 'Error',
