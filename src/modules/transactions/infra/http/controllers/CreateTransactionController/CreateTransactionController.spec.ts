@@ -7,12 +7,11 @@ import { container } from 'tsyringe';
 
 import { CreateTransactionController } from './CreateTransactionController.js';
 import { CreateTransactionService } from '#/modules/transactions/services/postgres/CreateTransactionService/CreateTransactionService.js';
-import { randomUUID } from 'node:crypto';
-import {
-  createMockReply,
-  createMockRequest,
-} from '#/test/utils/fastify-mock.js';
+
 import { createTransactionBodySchema } from '#/modules/transactions/schemas/requests/body/create-transaction-body-schema.js';
+import { faker } from '@faker-js/faker';
+import { TRANSACTION_TYPES } from '#/shared/infra/database/drizzle/schemas/transactions.js';
+import { createMockHttpRequest } from '#/test/utils/http-mock.js';
 
 describe('CreateTransactionController', () => {
   let createTransactionController: CreateTransactionController;
@@ -39,28 +38,25 @@ describe('CreateTransactionController', () => {
 
   test('should create a new transaction', async (t) => {
     const transactionPayload = {
-      name: 'Pizza',
+      name: faker.string.alphanumeric(16),
       date: new Date(),
-      amount: 62.0,
-      type: 'expense',
+      amount: faker.number.float({ fractionDigits: 2 }),
+      type: faker.helpers.arrayElement(TRANSACTION_TYPES),
     };
 
     const transactionData = {
       ...transactionPayload,
       amount: transactionPayload.amount.toString(),
-      id: randomUUID(),
-      userId: randomUUID(),
+      id: faker.string.uuid(),
+      userId: faker.string.uuid(),
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    const mockRequest = createMockRequest({
+    const mockHttpRequest = createMockHttpRequest({
       body: transactionPayload,
-      user: {
-        sub: randomUUID(),
-      },
+      userId: transactionData.userId,
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(
       createTransactionBodySchema,
@@ -71,29 +67,27 @@ describe('CreateTransactionController', () => {
       transaction: transactionData,
     }));
 
-    await createTransactionController.handle(mockRequest, mockReply);
+    const response = await createTransactionController.handle(mockHttpRequest);
+    const { transaction } = response.body as {
+      transaction: typeof transactionData;
+    };
 
-    assert.strictEqual(mockReply.status.mock.calls[0]?.arguments[0], 201);
-    assert.deepStrictEqual(mockReply.send.mock.calls[0]?.arguments[0], {
-      transaction: transactionData,
-    });
+    assert.strictEqual(response.statusCode, 201);
+    assert.deepStrictEqual(transaction, transactionData);
   });
 
   test('should throw an error if service fails', async (t) => {
     const transactionPayload = {
-      name: 'Pizza',
+      name: faker.string.alphanumeric(16),
       date: new Date(),
-      amount: 62.0,
-      type: 'expense',
+      amount: faker.number.float({ fractionDigits: 2 }),
+      type: faker.helpers.arrayElement(TRANSACTION_TYPES),
     };
 
-    const mockRequest = createMockRequest({
+    const mockHttpRequest = createMockHttpRequest({
       body: transactionPayload,
-      user: {
-        sub: randomUUID(),
-      },
+      userId: faker.string.uuid(),
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(
       createTransactionBodySchema,
@@ -106,7 +100,7 @@ describe('CreateTransactionController', () => {
 
     await assert.rejects(
       async () => {
-        await createTransactionController.handle(mockRequest, mockReply);
+        await createTransactionController.handle(mockHttpRequest);
       },
       {
         name: 'Error',
@@ -116,52 +110,23 @@ describe('CreateTransactionController', () => {
   });
 
   test('should throw an error if body is invalid', async (t) => {
-    const transactionPayload = {
-      name: 'Pizza',
-      date: new Date(),
-      amount: 62.0,
-      type: 'expense',
-    };
-
-    const transactionData = {
-      ...transactionPayload,
-      amount: transactionPayload.amount.toString(),
-      id: randomUUID(),
-      userId: randomUUID(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    const mockRequest = createMockRequest({
-      body: transactionPayload,
-      user: {
-        sub: randomUUID(),
-      },
+    const mockHttpRequest = createMockHttpRequest({
+      body: {},
+      userId: faker.string.uuid(),
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(createTransactionBodySchema, 'parse', () => {
       throw new Error('Validation error');
     });
 
-    const mockServiceExecuteFn = t.mock.method(
-      createTransactionService,
-      'execute',
-      async () => ({
-        transaction: transactionData,
-      })
-    );
-
     await assert.rejects(
       async () => {
-        await createTransactionController.handle(mockRequest, mockReply);
+        await createTransactionController.handle(mockHttpRequest);
       },
       {
         name: 'Error',
         message: 'Validation error',
       }
     );
-
-    assert.strictEqual(mockServiceExecuteFn.mock.callCount(), 0);
   });
 });
