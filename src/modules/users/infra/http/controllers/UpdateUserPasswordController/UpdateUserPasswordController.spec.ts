@@ -4,12 +4,11 @@ import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
 import { UpdateUserPasswordController } from './UpdateUserPasswordController.js';
 import { container } from 'tsyringe';
-import {
-  createMockReply,
-  createMockRequest,
-} from '#/test/utils/fastify-mock.js';
+
 import { UpdateUserPasswordService } from '#/modules/users/services/postgres/UpdateUserPasswordService/UpdateUserPasswordService.js';
 import { updateUserPasswordBodySchema } from '#/modules/users/schemas/requests/body/update-user-password-body-schema.js';
+import { createMockHttpRequest } from '#/test/utils/http-mock.js';
+import { faker } from '@faker-js/faker';
 
 describe('UpdateUserPasswordController', () => {
   let updateUserPasswordController: UpdateUserPasswordController;
@@ -34,40 +33,33 @@ describe('UpdateUserPasswordController', () => {
 
   test('should update user password', async (t) => {
     const userPayload = {
-      oldPassword: 'oldPassword',
-      newPassword: 'newPassword',
+      oldPassword: faker.internet.password(),
+      newPassword: faker.internet.password(),
     };
 
-    const mockRequest = createMockRequest({
+    const mockHttpRequest = createMockHttpRequest({
       body: userPayload,
-      user: {
-        sub: 'uuid-v4',
-      },
+      userId: faker.string.uuid(),
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(updateUserPasswordBodySchema, 'parse', () => userPayload);
     t.mock.method(updateUserPasswordService, 'execute', async () => {});
 
-    await updateUserPasswordController.handle(mockRequest, mockReply);
+    const response = await updateUserPasswordController.handle(mockHttpRequest);
 
-    assert.strictEqual(mockReply.status.mock.calls[0]?.arguments[0], 204);
-    assert.strictEqual(mockReply.send.mock.calls[0]?.arguments[0], undefined);
+    assert.strictEqual(response.statusCode, 204);
   });
 
   test('shold throw an error if service fails', async (t) => {
     const userPayload = {
-      oldPassword: 'oldPassword',
-      newPassword: 'newPassword',
+      oldPassword: faker.internet.password(),
+      newPassword: faker.internet.password(),
     };
 
-    const mockRequest = createMockRequest({
+    const mockHttpRequest = createMockHttpRequest({
       body: userPayload,
-      user: {
-        sub: 'uuid-v4',
-      },
+      userId: faker.string.uuid(),
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(updateUserPasswordBodySchema, 'parse', () => userPayload);
 
@@ -77,7 +69,7 @@ describe('UpdateUserPasswordController', () => {
 
     await assert.rejects(
       async () => {
-        await updateUserPasswordController.handle(mockRequest, mockReply);
+        await updateUserPasswordController.handle(mockHttpRequest);
       },
       {
         name: 'Error',
@@ -87,13 +79,10 @@ describe('UpdateUserPasswordController', () => {
   });
 
   test('shold throw an error if body is invalid', async (t) => {
-    const mockRequest = createMockRequest({
+    const mockHttpRequest = createMockHttpRequest({
       body: {},
-      user: {
-        sub: 'uuid-v4',
-      },
+      userId: faker.string.uuid(),
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(updateUserPasswordBodySchema, 'parse', () => {
       throw new Error('Validation error');
@@ -101,7 +90,7 @@ describe('UpdateUserPasswordController', () => {
 
     await assert.rejects(
       async () => {
-        await updateUserPasswordController.handle(mockRequest, mockReply);
+        await updateUserPasswordController.handle(mockHttpRequest);
       },
       {
         name: 'Error',
