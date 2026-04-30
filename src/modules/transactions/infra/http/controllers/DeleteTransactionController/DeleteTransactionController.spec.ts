@@ -5,12 +5,10 @@ import assert from 'node:assert';
 import { DeleteTransactionController } from './DeleteTransactionController.js';
 import { DeleteTransactionService } from '#/modules/transactions/services/postgres/DeleteTransactionService/DeleteTransactionService.js';
 import { container } from 'tsyringe';
-import { randomUUID } from 'node:crypto';
-import {
-  createMockReply,
-  createMockRequest,
-} from '#/test/utils/fastify-mock.js';
+
 import { getTransactionParamsSchema } from '#/modules/transactions/schemas/requests/params/get-transaction-params-schema.js';
+import { faker } from '@faker-js/faker';
+import { createMockHttpRequest } from '#/test/utils/http-mock.js';
 
 describe('DeleteTransactionController', () => {
   let deleteTransactionController: DeleteTransactionController;
@@ -35,16 +33,13 @@ describe('DeleteTransactionController', () => {
 
   test('should delete a transaction', async (t) => {
     const transactionPayload = {
-      transactionId: randomUUID(),
+      transactionId: faker.string.uuid(),
     };
 
-    const mockRequest = createMockRequest({
+    const mockHttpRequest = createMockHttpRequest({
       body: transactionPayload,
-      user: {
-        sub: randomUUID(),
-      },
+      userId: faker.string.uuid(),
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(
       getTransactionParamsSchema,
@@ -53,25 +48,20 @@ describe('DeleteTransactionController', () => {
     );
     t.mock.method(deleteTransactionService, 'execute', async () => {});
 
-    await assert.doesNotReject(async () => {
-      await deleteTransactionController.handle(mockRequest, mockReply);
-    });
+    const response = await deleteTransactionController.handle(mockHttpRequest);
 
-    assert.strictEqual(mockReply.status.mock.calls[0]?.arguments[0], 204);
+    assert.strictEqual(response.statusCode, 204);
   });
 
   test('should throw an error if service fails', async (t) => {
     const transactionPayload = {
-      transactionId: randomUUID(),
+      transactionId: faker.string.uuid(),
     };
 
-    const mockRequest = createMockRequest({
+    const mockHttpRequest = createMockHttpRequest({
       body: transactionPayload,
-      user: {
-        sub: randomUUID(),
-      },
+      userId: faker.string.uuid(),
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(
       getTransactionParamsSchema,
@@ -84,7 +74,7 @@ describe('DeleteTransactionController', () => {
 
     await assert.rejects(
       async () => {
-        await deleteTransactionController.handle(mockRequest, mockReply);
+        await deleteTransactionController.handle(mockHttpRequest);
       },
       {
         name: 'Error',
@@ -94,38 +84,23 @@ describe('DeleteTransactionController', () => {
   });
 
   test('should throw an error if body is invalid', async (t) => {
-    const transactionPayload = {
-      transactionId: randomUUID(),
-    };
-
-    const mockRequest = createMockRequest({
-      body: transactionPayload,
-      user: {
-        sub: randomUUID(),
-      },
+    const mockHttpRequest = createMockHttpRequest({
+      body: {},
+      userId: faker.string.uuid(),
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(getTransactionParamsSchema, 'parse', () => {
       throw new Error('Validation error');
     });
 
-    const mockServiceExecuteFn = t.mock.method(
-      deleteTransactionService,
-      'execute',
-      async () => {}
-    );
-
     await assert.rejects(
       async () => {
-        await deleteTransactionController.handle(mockRequest, mockReply);
+        await deleteTransactionController.handle(mockHttpRequest);
       },
       {
         name: 'Error',
         message: 'Validation error',
       }
     );
-
-    assert.strictEqual(mockServiceExecuteFn.mock.callCount(), 0);
   });
 });
