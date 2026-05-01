@@ -5,31 +5,29 @@ import assert from 'node:assert';
 import { GetTransactionController } from './GetTransactionController.js';
 import { GetTransactionService } from '#/modules/transactions/services/postgres/GetTransactionService/GetTransactionService.js';
 import { container } from 'tsyringe';
-import { randomUUID } from 'node:crypto';
-import {
-  createMockReply,
-  createMockRequest,
-} from '#/test/utils/fastify-mock.js';
-import type { TRANSACTION_TYPES } from '#/shared/infra/database/drizzle/schemas/transactions.js';
+
+import { TRANSACTION_TYPES } from '#/shared/infra/database/drizzle/schemas/transactions.js';
 import { getTransactionParamsSchema } from '#/modules/transactions/schemas/requests/params/get-transaction-params-schema.js';
+import { faker } from '@faker-js/faker';
+import { createMockHttpRequest } from '#/test/utils/http-mock.js';
 
 describe('GetTransactionController', () => {
   let getTransactionController: GetTransactionController;
   let getTransactionService: GetTransactionService;
 
   const transactionPayload = {
-    transactionId: randomUUID(),
+    transactionId: faker.string.uuid(),
   };
 
-  const userId = randomUUID();
+  const userId = faker.string.uuid();
 
   const transactionData = {
     id: transactionPayload.transactionId,
     userId,
-    name: 'Pizza',
+    name: faker.string.alphanumeric(16),
     date: new Date(),
-    amount: '62.0',
-    type: 'expense' as (typeof TRANSACTION_TYPES)[number],
+    amount: String(faker.number.float({ fractionDigits: 2 })),
+    type: faker.helpers.arrayElement(TRANSACTION_TYPES),
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -52,13 +50,10 @@ describe('GetTransactionController', () => {
   });
 
   test('should get a transaction', async (t) => {
-    const mockRequest = createMockRequest({
+    const mockHttpRequest = createMockHttpRequest({
       body: transactionPayload,
-      user: {
-        sub: userId,
-      },
+      userId,
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(
       getTransactionParamsSchema,
@@ -66,22 +61,20 @@ describe('GetTransactionController', () => {
       async () => transactionPayload
     );
 
-    await getTransactionController.handle(mockRequest, mockReply);
+    const response = await getTransactionController.handle(mockHttpRequest);
+    const { transaction } = response.body as {
+      transaction: typeof transactionData;
+    };
 
-    assert.strictEqual(mockReply.status.mock.calls[0]?.arguments[0], 200);
-    assert.deepStrictEqual(mockReply.send.mock.calls[0]?.arguments[0], {
-      transaction: transactionData,
-    });
+    assert.strictEqual(response.statusCode, 200);
+    assert.deepStrictEqual(transaction, transactionData);
   });
 
   test('should throw an error if service fails', async (t) => {
-    const mockRequest = createMockRequest({
+    const mockHttpRequest = createMockHttpRequest({
       body: transactionPayload,
-      user: {
-        sub: userId,
-      },
+      userId,
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(
       getTransactionParamsSchema,
@@ -94,7 +87,7 @@ describe('GetTransactionController', () => {
 
     await assert.rejects(
       async () => {
-        await getTransactionController.handle(mockRequest, mockReply);
+        await getTransactionController.handle(mockHttpRequest);
       },
       {
         name: 'Error',
@@ -104,13 +97,10 @@ describe('GetTransactionController', () => {
   });
 
   test('should throw an error if body is invalid', async (t) => {
-    const mockRequest = createMockRequest({
+    const mockHttpRequest = createMockHttpRequest({
       body: transactionPayload,
-      user: {
-        sub: userId,
-      },
+      userId,
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(getTransactionParamsSchema, 'parse', () => {
       throw new Error('Validation error');
@@ -126,7 +116,7 @@ describe('GetTransactionController', () => {
 
     await assert.rejects(
       async () => {
-        await getTransactionController.handle(mockRequest, mockReply);
+        await getTransactionController.handle(mockHttpRequest);
       },
       {
         name: 'Error',
