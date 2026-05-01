@@ -7,52 +7,57 @@ import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
 import { app } from '#/shared/infra/http/app.js';
 import { createAndAuthenticateUser } from '#/shared/utils/authenticate-user-helper.js';
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
+import { faker } from '@faker-js/faker';
 
 describe('UpdateUserPasswordController (Integration)', () => {
-	beforeEach(async () => {
-		await db.delete(usersTable);
-	});
+  beforeEach(async () => {
+    await db.delete(usersTable);
+  });
 
-	test('should update user password', async () => {
-		const { token, password } = await createAndAuthenticateUser(app);
+  test('should update user password', async () => {
+    const { token, password } = await createAndAuthenticateUser(app);
 
-		const response = await app.inject({
-			method: 'PATCH',
-			url: '/users/me/password',
-			payload: {
-				oldPassword: password,
-				newPassword: 'newPassword123',
-				confirmNewPassword: 'newPassword123',
-			},
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
-		});
+    const newPasswordPayload = faker.internet.password();
 
-		assert.strictEqual(response.statusCode, 204);
-	});
+    const response = await app.inject({
+      method: 'PATCH',
+      url: '/users/me/password',
+      payload: {
+        oldPassword: password,
+        newPassword: newPasswordPayload,
+        confirmNewPassword: newPasswordPayload,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-	test('should throw an error if body is invalid', async () => {
-		const { token, password } = await createAndAuthenticateUser(app);
+    assert.strictEqual(response.statusCode, 204);
+  });
 
-		const response = await app.inject({
-			method: 'PATCH',
-			url: '/users/me/password',
-			payload: {
-				oldPassword: 'wrong' + password,
-				newPassword: 'newPassword123',
-				confirmNewPassword: 'newPassword123',
-			},
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
-		});
+  test('should throw an error if body is invalid', async () => {
+    const { token } = await createAndAuthenticateUser(app);
 
-		const body = JSON.parse(response.payload);
+    const newPasswordPayload = faker.internet.password();
 
-		assert.strictEqual(response.statusCode, 401);
-		assert.deepStrictEqual(body, {
-			code: ERROR_CODES.INVALID_CREDENTIALS,
-		});
-	});
+    const response = await app.inject({
+      method: 'PATCH',
+      url: '/users/me/password',
+      payload: {
+        oldPassword: faker.internet.password(),
+        newPassword: newPasswordPayload,
+        confirmNewPassword: newPasswordPayload,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const body = JSON.parse(response.payload);
+
+    assert.strictEqual(response.statusCode, 401);
+    assert.deepStrictEqual(body, {
+      code: ERROR_CODES.INVALID_CREDENTIALS,
+    });
+  });
 });
