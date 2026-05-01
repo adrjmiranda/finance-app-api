@@ -1,9 +1,11 @@
+import { faker } from '@faker-js/faker';
+
 import { db } from '#/shared/infra/database/drizzle/db.js';
 import {
   TRANSACTION_TYPES,
   transactionsTable,
 } from '#/shared/infra/database/drizzle/schemas/transactions.js';
-import { faker } from '@faker-js/faker';
+
 import { createUser } from './user-helper.js';
 
 export async function createUserAndTransaction() {

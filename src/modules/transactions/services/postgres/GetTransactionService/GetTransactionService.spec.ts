@@ -1,14 +1,17 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { GetTransactionService } from './GetTransactionService.js';
-import { container } from 'tsyringe';
-import { db } from '#/shared/infra/database/drizzle/db.js';
-import { AppError } from '#/shared/error/AppError.js';
-import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
-import { makeTransaction } from '#/shared/tests/factories/make-transaction.js';
+import { beforeEach, describe, test } from 'node:test';
+
 import { faker } from '@faker-js/faker';
+import { container } from 'tsyringe';
+
+import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
+import { AppError } from '#/shared/error/AppError.js';
+import { db } from '#/shared/infra/database/drizzle/db.js';
+import { makeTransaction } from '#/shared/tests/factories/make-transaction.js';
+
+import { GetTransactionService } from './GetTransactionService.js';
 
 describe('GetTransactionService', () => {
   let getTransactionService: GetTransactionService;

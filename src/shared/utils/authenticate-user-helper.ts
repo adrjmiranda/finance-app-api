@@ -1,7 +1,7 @@
+import { faker } from '@faker-js/faker';
 import type { FastifyInstance } from 'fastify';
 
 import { createUser } from './user-helper.js';
-import { faker } from '@faker-js/faker';
 
 export async function createAndAuthenticateUser(app: FastifyInstance) {
   const password = faker.internet.password();

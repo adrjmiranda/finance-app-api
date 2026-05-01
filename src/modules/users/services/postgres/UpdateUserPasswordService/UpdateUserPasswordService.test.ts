@@ -1,18 +1,19 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { container } from 'tsyringe';
+import { beforeEach, describe, test } from 'node:test';
 
-import { db } from '#/shared/infra/database/drizzle/db.js';
-import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
-import { UpdateUserPasswordService } from './UpdateUserPasswordService.js';
-
+import { faker } from '@faker-js/faker';
 import bcrypt from 'bcrypt';
 import { eq } from 'drizzle-orm';
-import { AppError } from '#/shared/error/AppError.js';
+import { container } from 'tsyringe';
+
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
-import { faker } from '@faker-js/faker';
+import { AppError } from '#/shared/error/AppError.js';
+import { db } from '#/shared/infra/database/drizzle/db.js';
+import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
+
+import { UpdateUserPasswordService } from './UpdateUserPasswordService.js';
 
 describe('UpdateUserPasswordService (Integration)', async () => {
   let updateUserPasswordService: UpdateUserPasswordService;

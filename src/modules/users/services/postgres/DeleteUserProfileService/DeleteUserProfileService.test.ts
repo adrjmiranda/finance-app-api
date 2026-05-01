@@ -1,15 +1,17 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { DeleteUserProfileService } from './DeleteUserProfileService.js';
+import { beforeEach, describe, test } from 'node:test';
+
+import { faker } from '@faker-js/faker';
+import bcrypt from 'bcrypt';
+import { eq } from 'drizzle-orm';
 import { container } from 'tsyringe';
 
-import bcrypt from 'bcrypt';
 import { db } from '#/shared/infra/database/drizzle/db.js';
 import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
-import { eq } from 'drizzle-orm';
-import { faker } from '@faker-js/faker';
+
+import { DeleteUserProfileService } from './DeleteUserProfileService.js';
 
 describe('DeleteUserProfileService (Integration)', async () => {
   let deleteUserProfileService: DeleteUserProfileService;

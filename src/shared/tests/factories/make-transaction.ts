@@ -1,10 +1,10 @@
+import { faker } from '@faker-js/faker';
+
+import type { transactionsBalanceView } from '#/shared/infra/database/drizzle/schemas/transactions.js';
 import {
   TRANSACTION_TYPES,
   type transactionsTable,
 } from '#/shared/infra/database/drizzle/schemas/transactions.js';
-import type { transactionsBalanceView } from '#/shared/infra/database/drizzle/schemas/transactions.js';
-
-import { faker } from '@faker-js/faker';
 
 type TransactionEntity = typeof transactionsTable.$inferSelect;
 

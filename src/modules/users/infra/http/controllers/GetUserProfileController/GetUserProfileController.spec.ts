@@ -1,12 +1,15 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { GetUserProfileController } from './GetUserProfileController.js';
-import { GetUserProfileService } from '#/modules/users/services/postgres/GetUserProfileService/GetUserProfileService.js';
-import { container } from 'tsyringe';
-import { createMockHttpRequest } from '#/test/utils/http-mock.js';
+import { beforeEach, describe, test } from 'node:test';
+
 import { faker } from '@faker-js/faker';
+import { container } from 'tsyringe';
+
+import { GetUserProfileService } from '#/modules/users/services/postgres/GetUserProfileService/GetUserProfileService.js';
+import { createMockHttpRequest } from '#/test/utils/http-mock.js';
+
+import { GetUserProfileController } from './GetUserProfileController.js';
 
 describe('GetUserProfileController', () => {
   let getUserProfileController: GetUserProfileController;

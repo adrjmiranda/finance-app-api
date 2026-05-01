@@ -1,7 +1,8 @@
+import { faker } from '@faker-js/faker';
 import bcrypt from 'bcrypt';
+
 import { db } from '#/shared/infra/database/drizzle/db.js';
 import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
-import { faker } from '@faker-js/faker';
 
 interface ICreateUserData {
   firstName: string;

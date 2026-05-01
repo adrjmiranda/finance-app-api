@@ -1,12 +1,15 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { GetTransactionsBalanceController } from './GetTransactionsBalanceController.js';
-import { GetTransactionsBalanceService } from '#/modules/transactions/services/postgres/GetTransactionsBalanceService/GetTransactionsBalanceService.js';
-import { container } from 'tsyringe';
+import { beforeEach, describe, test } from 'node:test';
+
 import { faker } from '@faker-js/faker';
+import { container } from 'tsyringe';
+
+import { GetTransactionsBalanceService } from '#/modules/transactions/services/postgres/GetTransactionsBalanceService/GetTransactionsBalanceService.js';
 import { createMockHttpRequest } from '#/test/utils/http-mock.js';
+
+import { GetTransactionsBalanceController } from './GetTransactionsBalanceController.js';
 
 describe('GetTransactionsBalanceController', () => {
   let getTransactionsBalanceController: GetTransactionsBalanceController;

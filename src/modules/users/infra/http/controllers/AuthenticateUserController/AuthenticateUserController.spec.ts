@@ -1,14 +1,17 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { AuthenticateUserController } from './AuthenticateUserController.js';
-import { AuthenticateUserService } from '#/modules/users/services/postgres/AuthenticateUserService/AuthenticateUserService.js';
-import { container } from 'tsyringe';
-import { authenticateBodySchema } from '#/modules/users/schemas/requests/body/authenticate-body-schema.js';
-import { createMockHttpRequest } from '#/test/utils/http-mock.js';
-import type { ITokenProvider } from '#/shared/containers/providers/TokenProvider/models/ITokenProvider.js';
+import { beforeEach, describe, test } from 'node:test';
+
 import { faker } from '@faker-js/faker';
+import { container } from 'tsyringe';
+
+import { authenticateBodySchema } from '#/modules/users/schemas/requests/body/authenticate-body-schema.js';
+import { AuthenticateUserService } from '#/modules/users/services/postgres/AuthenticateUserService/AuthenticateUserService.js';
+import type { ITokenProvider } from '#/shared/containers/providers/TokenProvider/models/ITokenProvider.js';
+import { createMockHttpRequest } from '#/test/utils/http-mock.js';
+
+import { AuthenticateUserController } from './AuthenticateUserController.js';
 
 describe('AuthenticateUserController', () => {
   let authenticateUserController: AuthenticateUserController;

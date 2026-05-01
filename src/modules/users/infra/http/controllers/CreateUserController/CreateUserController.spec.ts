@@ -1,16 +1,17 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
+import { beforeEach, describe, test } from 'node:test';
 
+import { faker } from '@faker-js/faker';
 import { container } from 'tsyringe';
 
 import { createUserBodySchema } from '#/modules/users/schemas/requests/body/create-user-body-schema.js';
-import { CreateUserController } from './CreateUserController.js';
 import { CreateUserService } from '#/modules/users/services/postgres/CreateUserService/CreateUserService.js';
-import { createMockHttpRequest } from '#/test/utils/http-mock.js';
 import { makeUser } from '#/shared/tests/factories/make-user.js';
-import { faker } from '@faker-js/faker';
+import { createMockHttpRequest } from '#/test/utils/http-mock.js';
+
+import { CreateUserController } from './CreateUserController.js';
 
 describe('CreateUserController', () => {
   let createUserController: CreateUserController;

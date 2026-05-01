@@ -1,18 +1,20 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { db } from '#/shared/infra/database/drizzle/db.js';
-import { transactionsTable } from '#/shared/infra/database/drizzle/schemas/transactions.js';
-import { CreateTransactionService } from './CreateTransactionService.js';
+import { beforeEach, describe, test } from 'node:test';
+
+import { and, eq } from 'drizzle-orm';
 import { container } from 'tsyringe';
 
-import { createUser } from '#/shared/utils/user-helper.js';
-import { AppError } from '#/shared/error/AppError.js';
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
+import { AppError } from '#/shared/error/AppError.js';
+import { db } from '#/shared/infra/database/drizzle/db.js';
+import { transactionsTable } from '#/shared/infra/database/drizzle/schemas/transactions.js';
 import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
-import { and, eq } from 'drizzle-orm';
 import { makeTransaction } from '#/shared/tests/factories/make-transaction.js';
+import { createUser } from '#/shared/utils/user-helper.js';
+
+import { CreateTransactionService } from './CreateTransactionService.js';
 
 describe('CreateTransactionService (Integration)', () => {
   let createTransactionService: CreateTransactionService;

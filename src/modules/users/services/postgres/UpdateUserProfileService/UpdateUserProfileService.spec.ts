@@ -1,15 +1,18 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
+import { beforeEach, describe, test } from 'node:test';
+
+import { faker } from '@faker-js/faker';
 import { container } from 'tsyringe';
-import { UpdateUserProfileService } from './UpdateUserProfileService.js';
-import { db } from '#/shared/infra/database/drizzle/db.js';
-import { removeUndefined } from '#/shared/utils/remove-undefined.js';
+
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
 import { AppError } from '#/shared/error/AppError.js';
+import { db } from '#/shared/infra/database/drizzle/db.js';
 import { makeUser } from '#/shared/tests/factories/make-user.js';
-import { faker } from '@faker-js/faker';
+import { removeUndefined } from '#/shared/utils/remove-undefined.js';
+
+import { UpdateUserProfileService } from './UpdateUserProfileService.js';
 
 describe('UpdateUserProfileService', () => {
   let updateUserProfileService: UpdateUserProfileService;

@@ -1,17 +1,17 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
+import { beforeEach, describe, test } from 'node:test';
 
+import { faker } from '@faker-js/faker';
 import { container } from 'tsyringe';
 
-import { CreateTransactionController } from './CreateTransactionController.js';
-import { CreateTransactionService } from '#/modules/transactions/services/postgres/CreateTransactionService/CreateTransactionService.js';
-
 import { createTransactionBodySchema } from '#/modules/transactions/schemas/requests/body/create-transaction-body-schema.js';
-import { faker } from '@faker-js/faker';
+import { CreateTransactionService } from '#/modules/transactions/services/postgres/CreateTransactionService/CreateTransactionService.js';
 import { TRANSACTION_TYPES } from '#/shared/infra/database/drizzle/schemas/transactions.js';
 import { createMockHttpRequest } from '#/test/utils/http-mock.js';
+
+import { CreateTransactionController } from './CreateTransactionController.js';
 
 describe('CreateTransactionController', () => {
   let createTransactionController: CreateTransactionController;

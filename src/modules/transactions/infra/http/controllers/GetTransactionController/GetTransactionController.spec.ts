@@ -1,14 +1,16 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { GetTransactionController } from './GetTransactionController.js';
-import { GetTransactionService } from '#/modules/transactions/services/postgres/GetTransactionService/GetTransactionService.js';
+import { beforeEach, describe, test } from 'node:test';
+
 import { container } from 'tsyringe';
 
 import { getTransactionParamsSchema } from '#/modules/transactions/schemas/requests/params/get-transaction-params-schema.js';
-import { createMockHttpRequest } from '#/test/utils/http-mock.js';
+import { GetTransactionService } from '#/modules/transactions/services/postgres/GetTransactionService/GetTransactionService.js';
 import { makeTransaction } from '#/shared/tests/factories/make-transaction.js';
+import { createMockHttpRequest } from '#/test/utils/http-mock.js';
+
+import { GetTransactionController } from './GetTransactionController.js';
 
 describe('GetTransactionController', () => {
   let getTransactionController: GetTransactionController;

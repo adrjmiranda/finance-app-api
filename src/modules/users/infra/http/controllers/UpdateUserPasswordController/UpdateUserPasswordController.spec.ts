@@ -1,14 +1,16 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { UpdateUserPasswordController } from './UpdateUserPasswordController.js';
+import { beforeEach, describe, test } from 'node:test';
+
+import { faker } from '@faker-js/faker';
 import { container } from 'tsyringe';
 
-import { UpdateUserPasswordService } from '#/modules/users/services/postgres/UpdateUserPasswordService/UpdateUserPasswordService.js';
 import { updateUserPasswordBodySchema } from '#/modules/users/schemas/requests/body/update-user-password-body-schema.js';
+import { UpdateUserPasswordService } from '#/modules/users/services/postgres/UpdateUserPasswordService/UpdateUserPasswordService.js';
 import { createMockHttpRequest } from '#/test/utils/http-mock.js';
-import { faker } from '@faker-js/faker';
+
+import { UpdateUserPasswordController } from './UpdateUserPasswordController.js';
 
 describe('UpdateUserPasswordController', () => {
   let updateUserPasswordController: UpdateUserPasswordController;

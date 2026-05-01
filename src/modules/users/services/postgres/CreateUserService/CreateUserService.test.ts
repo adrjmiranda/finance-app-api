@@ -1,15 +1,18 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
+import { beforeEach, describe, test } from 'node:test';
+
+import { faker } from '@faker-js/faker';
+import { eq } from 'drizzle-orm';
 import { container } from 'tsyringe';
-import { CreateUserService } from './CreateUserService.js';
+
+import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
+import { AppError } from '#/shared/error/AppError.js';
 import { db } from '#/shared/infra/database/drizzle/db.js';
 import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
-import { eq } from 'drizzle-orm';
-import { AppError } from '#/shared/error/AppError.js';
-import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
-import { faker } from '@faker-js/faker';
+
+import { CreateUserService } from './CreateUserService.js';
 
 describe('CreateUserService (Integration)', () => {
   let createUserService: CreateUserService;

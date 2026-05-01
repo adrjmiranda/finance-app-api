@@ -1,14 +1,16 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { GetUserProfileService } from './GetUserProfileService.js';
-import { db } from '#/shared/infra/database/drizzle/db.js';
-import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
+import { beforeEach, describe, test } from 'node:test';
+
+import { faker } from '@faker-js/faker';
+import bcrypt from 'bcrypt';
 import { container } from 'tsyringe';
 
-import bcrypt from 'bcrypt';
-import { faker } from '@faker-js/faker';
+import { db } from '#/shared/infra/database/drizzle/db.js';
+import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
+
+import { GetUserProfileService } from './GetUserProfileService.js';
 
 describe('GetUserProfileService (Integration)', async () => {
   let getUserProfileService: GetUserProfileService;

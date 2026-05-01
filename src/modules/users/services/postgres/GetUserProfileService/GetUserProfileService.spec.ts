@@ -1,14 +1,17 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { GetUserProfileService } from './GetUserProfileService.js';
-import { container } from 'tsyringe';
-import { db } from '#/shared/infra/database/drizzle/db.js';
-import { AppError } from '#/shared/error/AppError.js';
-import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
-import { makeUser } from '#/shared/tests/factories/make-user.js';
+import { beforeEach, describe, test } from 'node:test';
+
 import { faker } from '@faker-js/faker';
+import { container } from 'tsyringe';
+
+import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
+import { AppError } from '#/shared/error/AppError.js';
+import { db } from '#/shared/infra/database/drizzle/db.js';
+import { makeUser } from '#/shared/tests/factories/make-user.js';
+
+import { GetUserProfileService } from './GetUserProfileService.js';
 
 describe('GetUserProfileService', () => {
   let getUserProfileService: GetUserProfileService;

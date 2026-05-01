@@ -1,14 +1,16 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { DeleteTransactionController } from './DeleteTransactionController.js';
-import { DeleteTransactionService } from '#/modules/transactions/services/postgres/DeleteTransactionService/DeleteTransactionService.js';
+import { beforeEach, describe, test } from 'node:test';
+
+import { faker } from '@faker-js/faker';
 import { container } from 'tsyringe';
 
 import { getTransactionParamsSchema } from '#/modules/transactions/schemas/requests/params/get-transaction-params-schema.js';
-import { faker } from '@faker-js/faker';
+import { DeleteTransactionService } from '#/modules/transactions/services/postgres/DeleteTransactionService/DeleteTransactionService.js';
 import { createMockHttpRequest } from '#/test/utils/http-mock.js';
+
+import { DeleteTransactionController } from './DeleteTransactionController.js';
 
 describe('DeleteTransactionController', () => {
   let deleteTransactionController: DeleteTransactionController;

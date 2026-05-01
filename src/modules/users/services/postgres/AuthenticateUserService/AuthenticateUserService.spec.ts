@@ -1,18 +1,18 @@
 import 'reflect-metadata';
+
+import assert from 'node:assert';
+import { beforeEach, describe, test } from 'node:test';
+
+import { faker } from '@faker-js/faker';
+import bcrypt from 'bcrypt';
 import { container } from 'tsyringe';
 
-import { describe, test, beforeEach } from 'node:test';
-import assert from 'node:assert';
-
-import bcrypt from 'bcrypt';
+import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
+import { AppError } from '#/shared/error/AppError.js';
+import { db } from '#/shared/infra/database/drizzle/db.js';
+import { makeUser } from '#/shared/tests/factories/make-user.js';
 
 import { AuthenticateUserService } from './AuthenticateUserService.js';
-
-import { db } from '#/shared/infra/database/drizzle/db.js';
-import { AppError } from '#/shared/error/AppError.js';
-import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
-import { makeUser } from '#/shared/tests/factories/make-user.js';
-import { faker } from '@faker-js/faker';
 
 describe('AuthenticateUserService', () => {
   let authenticateUserService: AuthenticateUserService;

@@ -1,26 +1,27 @@
+import { inject, injectable } from 'tsyringe';
+
 import { GetTransactionsBalanceService } from '#/modules/transactions/services/postgres/GetTransactionsBalanceService/GetTransactionsBalanceService.js';
 import type {
-	IHttpRequest,
-	IHttpResponse,
+  IHttpRequest,
+  IHttpResponse,
 } from '#/shared/adapters/HttpRouteAdapter.js';
-import { inject, injectable } from 'tsyringe';
 
 @injectable()
 export class GetTransactionsBalanceController {
-	constructor(
-		@inject(GetTransactionsBalanceService)
-		private getTransactionsBalanceService: GetTransactionsBalanceService
-	) {}
+  constructor(
+    @inject(GetTransactionsBalanceService)
+    private getTransactionsBalanceService: GetTransactionsBalanceService
+  ) {}
 
-	public handle = async (httpRequest: IHttpRequest): Promise<IHttpResponse> => {
-		const userId = String(httpRequest.userId);
+  public handle = async (httpRequest: IHttpRequest): Promise<IHttpResponse> => {
+    const userId = String(httpRequest.userId);
 
-		const { earnings, expenses, investments, balance } =
-			await this.getTransactionsBalanceService.execute({ userId });
+    const { earnings, expenses, investments, balance } =
+      await this.getTransactionsBalanceService.execute({ userId });
 
-		return {
-			statusCode: 200,
-			body: { earnings, expenses, investments, balance },
-		};
-	};
+    return {
+      statusCode: 200,
+      body: { earnings, expenses, investments, balance },
+    };
+  };
 }

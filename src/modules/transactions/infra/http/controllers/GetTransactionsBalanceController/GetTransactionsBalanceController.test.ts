@@ -1,13 +1,15 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { db } from '#/shared/infra/database/drizzle/db.js';
-import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
-import { transactionsTable } from '#/shared/infra/database/drizzle/schemas/transactions.js';
-import { createAndAuthenticateUser } from '#/shared/utils/authenticate-user-helper.js';
-import { app } from '#/shared/infra/http/app.js';
+import { beforeEach, describe, test } from 'node:test';
+
 import { faker } from '@faker-js/faker';
+
+import { db } from '#/shared/infra/database/drizzle/db.js';
+import { transactionsTable } from '#/shared/infra/database/drizzle/schemas/transactions.js';
+import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
+import { app } from '#/shared/infra/http/app.js';
+import { createAndAuthenticateUser } from '#/shared/utils/authenticate-user-helper.js';
 
 describe('GetTransactionsBalanceController (Integration)', () => {
   beforeEach(async () => {

@@ -1,12 +1,13 @@
 import 'reflect-metadata';
 import '#/shared/containers/index.js';
 
+import fastifyJwt from '@fastify/jwt';
 import fastify from 'fastify';
-import { GlobalErrorHandler } from './handlers/GlobalErrorHandler.js';
+
+import { env } from '#/shared/env/env.js';
 import { appRoutes } from '#/shared/infra/http/routes.js';
 
-import fastifyJwt from '@fastify/jwt';
-import { env } from '#/shared/env/env.js';
+import { GlobalErrorHandler } from './handlers/GlobalErrorHandler.js';
 
 const app = fastify({
   logger: true,

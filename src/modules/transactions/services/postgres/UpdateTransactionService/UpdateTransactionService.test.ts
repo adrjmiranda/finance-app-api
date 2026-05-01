@@ -1,21 +1,19 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
+import { beforeEach, describe, test } from 'node:test';
 
-import { UpdateTransactionService } from './UpdateTransactionService.js';
-import { db } from '#/shared/infra/database/drizzle/db.js';
-import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
-
+import { faker } from '@faker-js/faker';
 import { container } from 'tsyringe';
 
+import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
+import { AppError } from '#/shared/error/AppError.js';
+import { db } from '#/shared/infra/database/drizzle/db.js';
+import { TRANSACTION_TYPES } from '#/shared/infra/database/drizzle/schemas/transactions.js';
+import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
 import { createUserAndTransaction } from '#/shared/utils/user-and-transaction-helper.js';
 
-import { AppError } from '#/shared/error/AppError.js';
-import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
-
-import { TRANSACTION_TYPES } from '#/shared/infra/database/drizzle/schemas/transactions.js';
-import { faker } from '@faker-js/faker';
+import { UpdateTransactionService } from './UpdateTransactionService.js';
 
 describe('UpdateTransactionService (Integration)', () => {
   let updateTransactionService: UpdateTransactionService;

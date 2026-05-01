@@ -1,13 +1,15 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
+import { beforeEach, describe, test } from 'node:test';
+
+import { faker } from '@faker-js/faker';
+
+import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
 import { db } from '#/shared/infra/database/drizzle/db.js';
 import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
-import { createAndAuthenticateUser } from '#/shared/utils/authenticate-user-helper.js';
 import { app } from '#/shared/infra/http/app.js';
-import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
-import { faker } from '@faker-js/faker';
+import { createAndAuthenticateUser } from '#/shared/utils/authenticate-user-helper.js';
 
 describe('GetUserProfileController (Integration)', () => {
   beforeEach(async () => {

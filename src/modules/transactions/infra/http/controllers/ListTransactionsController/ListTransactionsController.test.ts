@@ -1,16 +1,18 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
+import { beforeEach, describe, test } from 'node:test';
+
+import { faker } from '@faker-js/faker';
+
 import { db } from '#/shared/infra/database/drizzle/db.js';
-import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
-import { createAndAuthenticateUser } from '#/shared/utils/authenticate-user-helper.js';
-import { app } from '#/shared/infra/http/app.js';
 import {
   TRANSACTION_TYPES,
   transactionsTable,
 } from '#/shared/infra/database/drizzle/schemas/transactions.js';
-import { faker } from '@faker-js/faker';
+import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
+import { app } from '#/shared/infra/http/app.js';
+import { createAndAuthenticateUser } from '#/shared/utils/authenticate-user-helper.js';
 
 describe('ListTransactionsController (Integration)', () => {
   beforeEach(async () => {

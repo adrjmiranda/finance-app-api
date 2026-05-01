@@ -1,17 +1,20 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { DeleteTransactionService } from './DeleteTransactionService.js';
-import { db } from '#/shared/infra/database/drizzle/db.js';
-import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
-import { container } from 'tsyringe';
-import { createUserAndTransaction } from '#/shared/utils/user-and-transaction-helper.js';
-import { transactionsTable } from '#/shared/infra/database/drizzle/schemas/transactions.js';
-import { and, eq } from 'drizzle-orm';
-import { AppError } from '#/shared/error/AppError.js';
-import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
+import { beforeEach, describe, test } from 'node:test';
+
 import { faker } from '@faker-js/faker';
+import { and, eq } from 'drizzle-orm';
+import { container } from 'tsyringe';
+
+import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
+import { AppError } from '#/shared/error/AppError.js';
+import { db } from '#/shared/infra/database/drizzle/db.js';
+import { transactionsTable } from '#/shared/infra/database/drizzle/schemas/transactions.js';
+import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
+import { createUserAndTransaction } from '#/shared/utils/user-and-transaction-helper.js';
+
+import { DeleteTransactionService } from './DeleteTransactionService.js';
 
 describe('DeleteTransactionService (Integration)', () => {
   let deleteTransactionService: DeleteTransactionService;

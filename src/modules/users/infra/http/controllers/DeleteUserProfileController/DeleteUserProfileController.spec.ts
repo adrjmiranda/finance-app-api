@@ -1,14 +1,16 @@
 import 'reflect-metadata';
 
-import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { DeleteUserProfileController } from './DeleteUserProfileController.js';
-import { DeleteUserProfileService } from '#/modules/users/services/postgres/DeleteUserProfileService/DeleteUserProfileService.js';
+import { beforeEach, describe, test } from 'node:test';
+
+import { faker } from '@faker-js/faker/locale/uk';
 import { container } from 'tsyringe';
 
 import { deleteUserProfileBodySchema } from '#/modules/users/schemas/requests/body/delete-user-profile-body-schema.js';
+import { DeleteUserProfileService } from '#/modules/users/services/postgres/DeleteUserProfileService/DeleteUserProfileService.js';
 import { createMockHttpRequest } from '#/test/utils/http-mock.js';
-import { faker } from '@faker-js/faker/locale/uk';
+
+import { DeleteUserProfileController } from './DeleteUserProfileController.js';
 
 describe('DeleteUserProfileController', () => {
   let deleteUserProfileController: DeleteUserProfileController;
