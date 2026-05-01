@@ -6,67 +6,72 @@ import { db } from '#/shared/infra/database/drizzle/db.js';
 import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
 import { createAndAuthenticateUser } from '#/shared/utils/authenticate-user-helper.js';
 import { app } from '#/shared/infra/http/app.js';
-import { transactionsTable } from '#/shared/infra/database/drizzle/schemas/transactions.js';
+import {
+  TRANSACTION_TYPES,
+  transactionsTable,
+} from '#/shared/infra/database/drizzle/schemas/transactions.js';
 import { eq } from 'drizzle-orm';
-import { randomUUID } from 'node:crypto';
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
+import { faker } from '@faker-js/faker';
 
 describe('DeleteTransactionController (Integration)', () => {
-	beforeEach(async () => {
-		await db.delete(usersTable);
-	});
+  beforeEach(async () => {
+    await db.delete(usersTable);
+  });
 
-	test('should delete a transaction', async () => {
-		const { authenticatedUser, token } = await createAndAuthenticateUser(app);
+  test('should delete a transaction', async () => {
+    const { authenticatedUser, token } = await createAndAuthenticateUser(app);
 
-		const [createdTransaction] = await db
-			.insert(transactionsTable)
-			.values({
-				name: 'Pizza',
-				date: new Date(),
-				amount: String(62.0),
-				type: 'expense',
-				userId: authenticatedUser!.id,
-			})
-			.returning()
-			.execute();
+    const [createdTransaction] = await db
+      .insert(transactionsTable)
+      .values({
+        name: faker.string.alpha(16),
+        date: new Date(),
+        amount: String(faker.number.float({ fractionDigits: 2 })),
+        type: faker.helpers.arrayElement(TRANSACTION_TYPES),
+        userId: authenticatedUser!.id,
+      })
+      .returning()
+      .execute();
 
-		const transactionId = createdTransaction!.id;
+    const transactionId = createdTransaction!.id;
 
-		const response = await app.inject({
-			method: 'DELETE',
-			url: `/transactions/${transactionId}`,
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
-		});
+    const response = await app.inject({
+      method: 'DELETE',
+      url: `/transactions/${transactionId}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-		assert.strictEqual(response.statusCode, 204);
+    assert.strictEqual(response.statusCode, 204);
 
-		const [transactionInDb] = await db
-			.select()
-			.from(transactionsTable)
-			.where(eq(transactionsTable.id, transactionId))
-			.limit(1);
+    const [transactionInDb] = await db
+      .select()
+      .from(transactionsTable)
+      .where(eq(transactionsTable.id, transactionId))
+      .limit(1);
 
-		assert.ok(!transactionInDb);
-	});
+    assert.ok(!transactionInDb);
+  });
 
-	test('should throw an error if transaction does not exist', async () => {
-		const { token } = await createAndAuthenticateUser(app);
+  test('should throw an error if transaction does not exist', async () => {
+    const { token } = await createAndAuthenticateUser(app);
 
-		const response = await app.inject({
-			method: 'DELETE',
-			url: `/transactions/${randomUUID()}`,
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
-		});
+    const wrongTransactionId = faker.string.uuid();
 
-		assert.strictEqual(response.statusCode, 404);
+    const response = await app.inject({
+      method: 'DELETE',
+      url: `/transactions/${wrongTransactionId}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-		const body = JSON.parse(response.payload);
+    assert.strictEqual(response.statusCode, 404);
 
-		assert.strictEqual(body.code, ERROR_CODES.TRANSACTION_NOT_FOUND);
-	});
+    const body = JSON.parse(response.payload);
+
+    assert.strictEqual(body.code, ERROR_CODES.TRANSACTION_NOT_FOUND);
+  });
 });
