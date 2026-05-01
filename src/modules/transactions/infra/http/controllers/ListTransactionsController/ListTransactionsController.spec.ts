@@ -5,11 +5,9 @@ import assert from 'assert';
 import { ListTransactionsController } from './ListTransactionsController.js';
 import { ListTransactionsService } from '#/modules/transactions/services/postgres/ListTransactionsService/ListTransactionsService.js';
 import { container } from 'tsyringe';
-import { randomUUID } from 'crypto';
-import {
-  createMockReply,
-  createMockRequest,
-} from '#/test/utils/fastify-mock.js';
+import { faker } from '@faker-js/faker';
+import { createMockHttpRequest } from '#/test/utils/http-mock.js';
+import type { transactionsTable } from '#/shared/infra/database/drizzle/schemas/transactions.js';
 
 describe('ListTransactionsController', () => {
   let listTransactionsController: ListTransactionsController;
@@ -35,40 +33,31 @@ describe('ListTransactionsController', () => {
   });
 
   test('should list transactions', async (t) => {
-    const payload = {
-      userId: randomUUID(),
-    };
+    const mockUserId = faker.string.uuid();
 
-    const mockRequest = createMockRequest({
-      user: {
-        sub: payload.userId,
-      },
-    });
-    const mockReply = createMockReply(t);
+    const mockHttpRequest = createMockHttpRequest({ userId: mockUserId });
+
+    const mockTransactionsData = [] as Array<
+      typeof transactionsTable.$inferSelect
+    >;
 
     t.mock.method(listTransactionsService, 'execute', async () => ({
-      transactions: [],
+      transactions: mockTransactionsData,
     }));
 
-    await listTransactionsController.handle(mockRequest, mockReply);
+    const response = await listTransactionsController.handle(mockHttpRequest);
+    const { transactions } = response.body as {
+      transactions: Array<typeof transactionsTable.$inferSelect>;
+    };
 
-    assert.strictEqual(mockReply.status.mock.calls[0]?.arguments[0], 200);
-    assert.deepStrictEqual(mockReply.send.mock.calls[0]?.arguments[0], {
-      transactions: [],
-    });
+    assert.strictEqual(response.statusCode, 200);
+    assert.deepStrictEqual(transactions, mockTransactionsData);
   });
 
   test('should throw an error if service fails', async (t) => {
-    const payload = {
-      userId: randomUUID(),
-    };
+    const mockUserId = faker.string.uuid();
 
-    const mockRequest = createMockRequest({
-      user: {
-        sub: payload.userId,
-      },
-    });
-    const mockReply = createMockReply(t);
+    const mockHttpRequest = createMockHttpRequest({ userId: mockUserId });
 
     t.mock.method(listTransactionsService, 'execute', async () => {
       throw new Error('Service error');
@@ -76,7 +65,7 @@ describe('ListTransactionsController', () => {
 
     await assert.rejects(
       async () => {
-        await listTransactionsController.handle(mockRequest, mockReply);
+        await listTransactionsController.handle(mockHttpRequest);
       },
       {
         name: 'Error',
