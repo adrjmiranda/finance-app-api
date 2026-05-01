@@ -6,31 +6,17 @@ import { GetTransactionController } from './GetTransactionController.js';
 import { GetTransactionService } from '#/modules/transactions/services/postgres/GetTransactionService/GetTransactionService.js';
 import { container } from 'tsyringe';
 
-import { TRANSACTION_TYPES } from '#/shared/infra/database/drizzle/schemas/transactions.js';
 import { getTransactionParamsSchema } from '#/modules/transactions/schemas/requests/params/get-transaction-params-schema.js';
-import { faker } from '@faker-js/faker';
 import { createMockHttpRequest } from '#/test/utils/http-mock.js';
+import { makeTransaction } from '#/shared/tests/factories/make-transaction.js';
 
 describe('GetTransactionController', () => {
   let getTransactionController: GetTransactionController;
   let getTransactionService: GetTransactionService;
 
-  const transactionPayload = {
-    transactionId: faker.string.uuid(),
-  };
-
-  const userId = faker.string.uuid();
-
-  const transactionData = {
-    id: transactionPayload.transactionId,
-    userId,
-    name: faker.string.alphanumeric(16),
-    date: new Date(),
-    amount: String(faker.number.float({ fractionDigits: 2 })),
-    type: faker.helpers.arrayElement(TRANSACTION_TYPES),
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
+  const mockTransactionData = makeTransaction();
+  const mockUserId = mockTransactionData.userId;
+  const mockTransactionPayload = { transactionId: mockTransactionData.id };
 
   beforeEach(() => {
     container.clearInstances();
@@ -38,7 +24,7 @@ describe('GetTransactionController', () => {
 
     getTransactionService = {
       execute: async () => ({
-        transaction: transactionData,
+        transaction: mockTransactionData,
       }),
     };
 
@@ -51,35 +37,35 @@ describe('GetTransactionController', () => {
 
   test('should get a transaction', async (t) => {
     const mockHttpRequest = createMockHttpRequest({
-      body: transactionPayload,
-      userId,
+      body: mockTransactionPayload,
+      userId: mockUserId,
     });
 
     t.mock.method(
       getTransactionParamsSchema,
       'parse',
-      async () => transactionPayload
+      async () => mockTransactionPayload
     );
 
     const response = await getTransactionController.handle(mockHttpRequest);
     const { transaction } = response.body as {
-      transaction: typeof transactionData;
+      transaction: typeof mockTransactionData;
     };
 
     assert.strictEqual(response.statusCode, 200);
-    assert.deepStrictEqual(transaction, transactionData);
+    assert.deepStrictEqual(transaction, mockTransactionData);
   });
 
   test('should throw an error if service fails', async (t) => {
     const mockHttpRequest = createMockHttpRequest({
-      body: transactionPayload,
-      userId,
+      body: mockTransactionPayload,
+      userId: mockUserId,
     });
 
     t.mock.method(
       getTransactionParamsSchema,
       'parse',
-      async () => transactionPayload
+      async () => mockTransactionPayload
     );
     t.mock.method(getTransactionService, 'execute', async () => {
       throw new Error('Service error');
@@ -98,8 +84,8 @@ describe('GetTransactionController', () => {
 
   test('should throw an error if body is invalid', async (t) => {
     const mockHttpRequest = createMockHttpRequest({
-      body: transactionPayload,
-      userId,
+      body: mockTransactionPayload,
+      userId: mockUserId,
     });
 
     t.mock.method(getTransactionParamsSchema, 'parse', () => {
@@ -110,7 +96,7 @@ describe('GetTransactionController', () => {
       getTransactionService,
       'execute',
       async () => ({
-        transaction: transactionData,
+        transaction: mockTransactionData,
       })
     );
 
