@@ -11,7 +11,7 @@ interface ICreateUserData {
 }
 
 export async function createUser(override: Partial<ICreateUserData> = {}) {
-  const password = faker.internet.password();
+  const password = override.password ?? faker.internet.password();
   const passwordHash = await bcrypt.hash(password, 10);
 
   const [user] = await db

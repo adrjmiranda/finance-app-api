@@ -18,6 +18,8 @@ export async function createAndAuthenticateUser(app: FastifyInstance) {
 
   const body = JSON.parse(response.payload);
 
+  console.log('BODY ---->', body);
+
   return {
     token: body.token as string,
     authenticatedUser: user,

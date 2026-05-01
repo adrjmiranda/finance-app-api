@@ -8,57 +8,58 @@ import { app } from '#/shared/infra/http/app.js';
 import { createAndAuthenticateUser } from '#/shared/utils/authenticate-user-helper.js';
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
 import { eq } from 'drizzle-orm';
+import { faker } from '@faker-js/faker';
 
 describe('DeleteUserProfileController (Integration)', () => {
-	beforeEach(async () => {
-		await db.delete(usersTable);
-	});
+  beforeEach(async () => {
+    await db.delete(usersTable);
+  });
 
-	test('should delete the user profile', async () => {
-		const { token, authenticatedUser, password } =
-			await createAndAuthenticateUser(app);
+  test('should delete the user profile', async () => {
+    const { token, authenticatedUser, password } =
+      await createAndAuthenticateUser(app);
 
-		const response = await app.inject({
-			method: 'DELETE',
-			url: '/users/me',
-			payload: {
-				password,
-			},
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
-		});
+    const response = await app.inject({
+      method: 'DELETE',
+      url: '/users/me',
+      payload: {
+        password,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-		assert.strictEqual(response.statusCode, 204);
+    assert.strictEqual(response.statusCode, 204);
 
-		const [userInDb] = await db
-			.select()
-			.from(usersTable)
-			.where(eq(usersTable.id, authenticatedUser?.id ?? 'not-auth'))
-			.limit(1);
+    const [userInDb] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, authenticatedUser?.id ?? 'not-auth'))
+      .limit(1);
 
-		assert.strictEqual(userInDb?.id, undefined);
-	});
+    assert.strictEqual(userInDb?.id, undefined);
+  });
 
-	test('should throw an error if body is invalid', async () => {
-		const { token, password } = await createAndAuthenticateUser(app);
+  test('should throw an error if body is invalid', async () => {
+    const { token } = await createAndAuthenticateUser(app);
 
-		const response = await app.inject({
-			method: 'DELETE',
-			url: '/users/me',
-			payload: {
-				password: 'wrong' + password,
-			},
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
-		});
+    const response = await app.inject({
+      method: 'DELETE',
+      url: '/users/me',
+      payload: {
+        password: faker.internet.password(),
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-		const body = JSON.parse(response.payload);
+    const body = JSON.parse(response.payload);
 
-		assert.strictEqual(response.statusCode, 401);
-		assert.deepStrictEqual(body, {
-			code: ERROR_CODES.UNAUTHORIZED,
-		});
-	});
+    assert.strictEqual(response.statusCode, 401);
+    assert.deepStrictEqual(body, {
+      code: ERROR_CODES.UNAUTHORIZED,
+    });
+  });
 });
