@@ -7,24 +7,23 @@ import { UpdateTransactionService } from '#/modules/transactions/services/postgr
 import { container } from 'tsyringe';
 import { getTransactionParamsSchema } from '#/modules/transactions/schemas/requests/params/get-transaction-params-schema.js';
 import { updateTransactionBodySchema } from '#/modules/transactions/schemas/requests/body/update-transaction-body-schema.js';
-import { randomUUID } from 'node:crypto';
-import {
-  createMockReply,
-  createMockRequest,
-} from '#/test/utils/fastify-mock.js';
+import { makeTransaction } from '#/shared/tests/factories/make-transaction.js';
+import { createMockHttpRequest } from '#/test/utils/http-mock.js';
 
 describe('UpdateTransactionController', () => {
   let updateTransactionController: UpdateTransactionController;
   let updateTransactionService: UpdateTransactionService;
 
-  const userId = randomUUID();
-  const transactionId = randomUUID();
+  const mockTransactionDataToUpdate = makeTransaction();
+
+  const mockUserId = mockTransactionDataToUpdate.userId;
+  const mockTransactionId = mockTransactionDataToUpdate.id;
 
   const payload = {
-    name: 'Pizza',
-    date: new Date(),
-    amount: 62.5,
-    type: 'expense',
+    name: mockTransactionDataToUpdate.name,
+    date: mockTransactionDataToUpdate.date,
+    amount: Number(mockTransactionDataToUpdate.amount),
+    type: mockTransactionDataToUpdate.type,
   };
 
   beforeEach(() => {
@@ -33,7 +32,7 @@ describe('UpdateTransactionController', () => {
 
     updateTransactionService = {
       execute: async () => ({
-        transaction: undefined,
+        transaction: mockTransactionDataToUpdate,
       }),
     };
 
@@ -47,50 +46,33 @@ describe('UpdateTransactionController', () => {
   });
 
   test('should update transaction', async (t) => {
-    const mockRequest = createMockRequest({
+    const mockHttpRequest = createMockHttpRequest({
       body: payload,
-      user: {
-        sub: userId,
-      },
+      userId: mockUserId,
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(getTransactionParamsSchema, 'parse', () => ({
-      transactionId,
+      transactinoId: mockTransactionId,
     }));
     t.mock.method(updateTransactionBodySchema, 'parse', () => payload);
 
-    const transactionData = {
-      ...payload,
-      id: transactionId,
-      userId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    const response = await updateTransactionController.handle(mockHttpRequest);
+    const { transaction } = response.body as {
+      transaction: typeof mockTransactionDataToUpdate;
     };
 
-    t.mock.method(updateTransactionService, 'execute', async () => ({
-      transaction: transactionData,
-    }));
-
-    await updateTransactionController.handle(mockRequest, mockReply);
-
-    assert.strictEqual(mockReply.status.mock.calls[0]?.arguments[0], 200);
-    assert.deepStrictEqual(mockReply.send.mock.calls[0]?.arguments[0], {
-      transaction: transactionData,
-    });
+    assert.strictEqual(response.statusCode, 200);
+    assert.deepStrictEqual(transaction, mockTransactionDataToUpdate);
   });
 
   test('should throw an error if service fails', async (t) => {
-    const mockRequest = createMockRequest({
+    const mockHttpRequest = createMockHttpRequest({
       body: payload,
-      user: {
-        sub: userId,
-      },
+      userId: mockUserId,
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(getTransactionParamsSchema, 'parse', () => ({
-      transactionId,
+      transactionId: mockTransactionId,
     }));
     t.mock.method(updateTransactionBodySchema, 'parse', () => payload);
 
@@ -100,7 +82,7 @@ describe('UpdateTransactionController', () => {
 
     await assert.rejects(
       async () => {
-        await updateTransactionController.handle(mockRequest, mockReply);
+        await updateTransactionController.handle(mockHttpRequest);
       },
       {
         name: 'Error',
@@ -110,13 +92,10 @@ describe('UpdateTransactionController', () => {
   });
 
   test('should throw an error if transaction id params are invalid', async (t) => {
-    const mockRequest = createMockRequest({
+    const mockHttpRequest = createMockHttpRequest({
       body: payload,
-      user: {
-        sub: userId,
-      },
+      userId: mockUserId,
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(getTransactionParamsSchema, 'parse', () => {
       throw new Error('Transaction id params error');
@@ -137,7 +116,7 @@ describe('UpdateTransactionController', () => {
 
     await assert.rejects(
       async () => {
-        await updateTransactionController.handle(mockRequest, mockReply);
+        await updateTransactionController.handle(mockHttpRequest);
       },
       {
         name: 'Error',
@@ -153,16 +132,13 @@ describe('UpdateTransactionController', () => {
   });
 
   test('should throw an error if payload body is invalid', async (t) => {
-    const mockRequest = createMockRequest({
+    const mockHttpRequest = createMockHttpRequest({
       body: payload,
-      user: {
-        sub: userId,
-      },
+      userId: mockUserId,
     });
-    const mockReply = createMockReply(t);
 
     t.mock.method(getTransactionParamsSchema, 'parse', () => ({
-      transactionId,
+      transactionId: mockTransactionId,
     }));
     t.mock.method(updateTransactionBodySchema, 'parse', () => {
       throw new Error('Transaction payload body error');
@@ -178,7 +154,7 @@ describe('UpdateTransactionController', () => {
 
     await assert.rejects(
       async () => {
-        await updateTransactionController.handle(mockRequest, mockReply);
+        await updateTransactionController.handle(mockHttpRequest);
       },
       {
         name: 'Error',
