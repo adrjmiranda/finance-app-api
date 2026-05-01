@@ -7,61 +7,62 @@ import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
 import { transactionsTable } from '#/shared/infra/database/drizzle/schemas/transactions.js';
 import { createAndAuthenticateUser } from '#/shared/utils/authenticate-user-helper.js';
 import { app } from '#/shared/infra/http/app.js';
+import { faker } from '@faker-js/faker';
 
 describe('GetTransactionsBalanceController (Integration)', () => {
-	beforeEach(async () => {
-		await db.delete(usersTable);
-	});
+  beforeEach(async () => {
+    await db.delete(usersTable);
+  });
 
-	test('should return the transactions balance', async () => {
-		const { authenticatedUser, token } = await createAndAuthenticateUser(app);
+  test('should return the transactions balance', async () => {
+    const { authenticatedUser, token } = await createAndAuthenticateUser(app);
 
-		const earning = 150.0;
-		const expense = 62.0;
-		const investment = 220.0;
-		const balance = earning - expense + investment;
+    const earning = faker.number.float({ fractionDigits: 2 });
+    const expense = faker.number.float({ fractionDigits: 2 });
+    const investment = faker.number.float({ fractionDigits: 2 });
+    const balance = Number((earning - expense + investment).toFixed(2));
 
-		await db.insert(transactionsTable).values([
-			{
-				name: 'Pizza',
-				date: new Date(),
-				amount: String(expense),
-				type: 'expense',
-				userId: authenticatedUser!.id,
-			},
-			{
-				name: 'Pizza',
-				date: new Date(),
-				amount: String(earning),
-				type: 'earning',
-				userId: authenticatedUser!.id,
-			},
-			{
-				name: 'Pizza',
-				date: new Date(),
-				amount: String(investment),
-				type: 'investment',
-				userId: authenticatedUser!.id,
-			},
-		]);
+    await db.insert(transactionsTable).values([
+      {
+        name: faker.string.alpha(16),
+        date: new Date(),
+        amount: String(expense),
+        type: 'expense',
+        userId: authenticatedUser!.id,
+      },
+      {
+        name: faker.string.alpha(16),
+        date: new Date(),
+        amount: String(earning),
+        type: 'earning',
+        userId: authenticatedUser!.id,
+      },
+      {
+        name: faker.string.alpha(16),
+        date: new Date(),
+        amount: String(investment),
+        type: 'investment',
+        userId: authenticatedUser!.id,
+      },
+    ]);
 
-		const response = await app.inject({
-			method: 'GET',
-			url: '/transactions/balances',
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
-		});
+    const response = await app.inject({
+      method: 'GET',
+      url: '/transactions/balances',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-		assert.strictEqual(response.statusCode, 200);
+    assert.strictEqual(response.statusCode, 200);
 
-		const body = JSON.parse(response.payload);
+    const body = JSON.parse(response.payload);
 
-		assert.deepStrictEqual(body, {
-			earnings: earning,
-			expenses: expense,
-			investments: investment,
-			balance,
-		});
-	});
+    assert.deepStrictEqual(body, {
+      earnings: earning,
+      expenses: expense,
+      investments: investment,
+      balance,
+    });
+  });
 });
