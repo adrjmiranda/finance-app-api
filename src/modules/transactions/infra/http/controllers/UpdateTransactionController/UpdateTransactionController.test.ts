@@ -4,80 +4,88 @@ import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert';
 import { db } from '#/shared/infra/database/drizzle/db.js';
 import { usersTable } from '#/shared/infra/database/drizzle/schemas/users.js';
-import { transactionsTable } from '#/shared/infra/database/drizzle/schemas/transactions.js';
+import {
+  TRANSACTION_TYPES,
+  transactionsTable,
+} from '#/shared/infra/database/drizzle/schemas/transactions.js';
 import { app } from '#/shared/infra/http/app.js';
 import { createAndAuthenticateUser } from '#/shared/utils/authenticate-user-helper.js';
-import { randomUUID } from 'node:crypto';
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
+import { faker } from '@faker-js/faker';
 
 describe('UpdateTransactionController (Integration)', () => {
-	beforeEach(async () => {
-		await db.delete(usersTable);
-	});
+  beforeEach(async () => {
+    await db.delete(usersTable);
+  });
 
-	test('should update a transaction', async () => {
-		const { authenticatedUser, token } = await createAndAuthenticateUser(app);
+  test('should update a transaction', async () => {
+    const { authenticatedUser, token } = await createAndAuthenticateUser(app);
 
-		const [createdTransaction] = await db
-			.insert(transactionsTable)
-			.values({
-				name: 'Pizza',
-				date: new Date(),
-				amount: String(62.0),
-				type: 'expense',
-				userId: authenticatedUser!.id,
-			})
-			.returning()
-			.execute();
+    const name = faker.string.alpha(16);
+    const date = new Date();
+    const amount = faker.number.float({ fractionDigits: 2 });
+    const type = faker.helpers.arrayElement(TRANSACTION_TYPES);
 
-		const payload = {
-			name: 'Book',
-			date: new Date(),
-			amount: 50.0,
-			type: 'expense',
-		};
+    const payload = {
+      name,
+      date,
+      amount,
+      type,
+    };
 
-		const response = await app.inject({
-			method: 'PATCH',
-			url: `/transactions/${createdTransaction!.id}`,
-			payload,
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
-		});
+    const [createdTransaction] = await db
+      .insert(transactionsTable)
+      .values({
+        ...payload,
+        amount: String(payload.amount),
+        userId: authenticatedUser!.id,
+      })
+      .returning()
+      .execute();
 
-		assert.strictEqual(response.statusCode, 200);
+    const response = await app.inject({
+      method: 'PATCH',
+      url: `/transactions/${createdTransaction!.id}`,
+      payload,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-		const body = JSON.parse(response.payload);
+    assert.strictEqual(response.statusCode, 200);
 
-		assert.strictEqual(body.transaction.id, createdTransaction!.id);
-		assert.strictEqual(body.transaction.name, payload.name);
-		assert.strictEqual(Number(body.transaction.amount), payload.amount);
-	});
+    const body = JSON.parse(response.payload);
 
-	test('should throw an error if transaction does not exist', async () => {
-		const { token } = await createAndAuthenticateUser(app);
+    assert.strictEqual(body.transaction.id, createdTransaction!.id);
+    assert.strictEqual(body.transaction.name, payload.name);
+    assert.strictEqual(Number(body.transaction.amount), payload.amount);
+  });
 
-		const payload = {
-			name: 'Book',
-			date: new Date(),
-			amount: 50.0,
-			type: 'expense',
-		};
+  test('should throw an error if transaction does not exist', async () => {
+    const { token } = await createAndAuthenticateUser(app);
 
-		const response = await app.inject({
-			method: 'PATCH',
-			url: `/transactions/${randomUUID()}`,
-			payload,
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
-		});
+    const payload = {
+      name: faker.string.alpha(16),
+      date: new Date(),
+      amount: faker.number.float({ fractionDigits: 2 }),
+      type: faker.helpers.arrayElement(TRANSACTION_TYPES),
+    };
 
-		assert.strictEqual(response.statusCode, 404);
+    const wrongTransactionId = faker.string.uuid();
 
-		const body = JSON.parse(response.payload);
+    const response = await app.inject({
+      method: 'PATCH',
+      url: `/transactions/${wrongTransactionId}`,
+      payload,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-		assert.strictEqual(body.code, ERROR_CODES.TRANSACTION_NOT_FOUND);
-	});
+    assert.strictEqual(response.statusCode, 404);
+
+    const body = JSON.parse(response.payload);
+
+    assert.strictEqual(body.code, ERROR_CODES.TRANSACTION_NOT_FOUND);
+  });
 });
