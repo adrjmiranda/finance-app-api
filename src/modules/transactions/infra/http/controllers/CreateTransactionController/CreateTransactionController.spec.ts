@@ -38,7 +38,7 @@ describe('CreateTransactionController', () => {
 
   test('should create a new transaction', async (t) => {
     const transactionPayload = {
-      name: faker.string.alphanumeric(16),
+      name: faker.string.alpha(16),
       date: new Date(),
       amount: faker.number.float({ fractionDigits: 2 }),
       type: faker.helpers.arrayElement(TRANSACTION_TYPES),
@@ -78,7 +78,7 @@ describe('CreateTransactionController', () => {
 
   test('should throw an error if service fails', async (t) => {
     const transactionPayload = {
-      name: faker.string.alphanumeric(16),
+      name: faker.string.alpha(16),
       date: new Date(),
       amount: faker.number.float({ fractionDigits: 2 }),
       type: faker.helpers.arrayElement(TRANSACTION_TYPES),
