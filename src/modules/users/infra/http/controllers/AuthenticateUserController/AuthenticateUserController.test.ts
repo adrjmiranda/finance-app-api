@@ -9,6 +9,7 @@ import bcrypt from 'bcrypt';
 import { app } from '#/shared/infra/http/app.js';
 
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
+import { faker } from '@faker-js/faker';
 
 describe('AuthenticateUserController (Integration)', () => {
   beforeEach(async () => {
@@ -17,8 +18,8 @@ describe('AuthenticateUserController (Integration)', () => {
 
   test('should authenticate a user', async () => {
     const userPayload = {
-      email: 'adriano@email.com',
-      password: 'password123',
+      email: faker.internet.email(),
+      password: faker.internet.password(),
     };
 
     const passwordHash = await bcrypt.hash(userPayload.password, 10);
@@ -26,8 +27,8 @@ describe('AuthenticateUserController (Integration)', () => {
     const [createdUser] = await db
       .insert(usersTable)
       .values({
-        firstName: 'Adriano',
-        lastName: 'Miranda',
+        firstName: faker.person.firstName(),
+        lastName: faker.person.lastName(),
         email: userPayload.email,
         passwordHash,
       })
@@ -53,8 +54,8 @@ describe('AuthenticateUserController (Integration)', () => {
 
   test('should throw an error if user does not exist', async () => {
     const userPayload = {
-      email: 'notfound@email.com',
-      password: 'password123',
+      email: faker.internet.email(),
+      password: faker.internet.password(),
     };
 
     const response = await app.inject({
@@ -72,17 +73,17 @@ describe('AuthenticateUserController (Integration)', () => {
 
   test('should throw an error if password is incorrect', async () => {
     const userPayload = {
-      email: 'adriano@email.com',
-      password: 'wrong-password',
+      email: faker.internet.email(),
+      password: faker.internet.password(),
     };
 
-    const passwordHash = await bcrypt.hash('correct-password', 10);
+    const passwordHash = await bcrypt.hash(faker.internet.password(), 10);
 
     await db
       .insert(usersTable)
       .values({
-        firstName: 'Adriano',
-        lastName: 'Miranda',
+        firstName: faker.person.firstName(),
+        lastName: faker.person.lastName(),
         email: userPayload.email,
         passwordHash,
       })

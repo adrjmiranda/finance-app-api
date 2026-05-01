@@ -1,3 +1,6 @@
+import 'reflect-metadata';
+import '#/shared/containers/index.js';
+
 import fastify from 'fastify';
 import { GlobalErrorHandler } from './handlers/GlobalErrorHandler.js';
 import { appRoutes } from '#/shared/infra/http/routes.js';
@@ -6,16 +9,16 @@ import fastifyJwt from '@fastify/jwt';
 import { env } from '#/shared/env/env.js';
 
 const app = fastify({
-	logger: true,
+  logger: true,
 });
 
 app.setErrorHandler(GlobalErrorHandler.handler);
 
 app.register(fastifyJwt, {
-	secret: env.JWT_SECRET,
-	sign: {
-		expiresIn: '7d',
-	},
+  secret: env.JWT_SECRET,
+  sign: {
+    expiresIn: '7d',
+  },
 });
 
 app.register(appRoutes);
