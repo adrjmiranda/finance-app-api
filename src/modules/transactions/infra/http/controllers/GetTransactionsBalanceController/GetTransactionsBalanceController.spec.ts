@@ -5,11 +5,8 @@ import assert from 'node:assert';
 import { GetTransactionsBalanceController } from './GetTransactionsBalanceController.js';
 import { GetTransactionsBalanceService } from '#/modules/transactions/services/postgres/GetTransactionsBalanceService/GetTransactionsBalanceService.js';
 import { container } from 'tsyringe';
-import { randomUUID } from 'node:crypto';
-import {
-  createMockReply,
-  createMockRequest,
-} from '#/test/utils/fastify-mock.js';
+import { faker } from '@faker-js/faker';
+import { createMockHttpRequest } from '#/test/utils/http-mock.js';
 
 describe('GetTransactionsBalanceController', () => {
   let getTransactionsBalanceController: GetTransactionsBalanceController;
@@ -39,38 +36,22 @@ describe('GetTransactionsBalanceController', () => {
     );
   });
 
-  test('should return the transactions balance', async (t) => {
-    const payload = {
-      userId: randomUUID(),
-    };
+  test('should return the transactions balance', async () => {
+    const mockUserId = faker.string.uuid();
 
-    const mockRequest = createMockRequest({
-      user: {
-        sub: payload.userId,
-      },
-    });
-    const mockReply = createMockReply(t);
+    const mockHttpRequest = createMockHttpRequest({ userId: mockUserId });
 
-    await getTransactionsBalanceController.handle(mockRequest, mockReply);
+    const response =
+      await getTransactionsBalanceController.handle(mockHttpRequest);
 
-    assert.strictEqual(mockReply.status.mock.calls[0]?.arguments[0], 200);
-    assert.deepStrictEqual(
-      mockReply.send.mock.calls[0]?.arguments[0],
-      balanceData
-    );
+    assert.strictEqual(response.statusCode, 200);
+    assert.deepStrictEqual(response.body, balanceData);
   });
 
   test('should throw an error if service fails', async (t) => {
-    const payload = {
-      userId: randomUUID(),
-    };
+    const mockUserId = faker.string.uuid();
 
-    const mockRequest = createMockRequest({
-      user: {
-        sub: payload.userId,
-      },
-    });
-    const mockReply = createMockReply(t);
+    const mockHttpRequest = createMockHttpRequest({ userId: mockUserId });
 
     t.mock.method(getTransactionsBalanceService, 'execute', async () => {
       throw new Error('Service error');
@@ -78,7 +59,7 @@ describe('GetTransactionsBalanceController', () => {
 
     await assert.rejects(
       async () => {
-        await getTransactionsBalanceController.handle(mockRequest, mockReply);
+        await getTransactionsBalanceController.handle(mockHttpRequest);
       },
       {
         name: 'Error',
