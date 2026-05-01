@@ -9,100 +9,103 @@ import { eq } from 'drizzle-orm';
 
 import bcrypt from 'bcrypt';
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
+import { faker } from '@faker-js/faker';
 
 describe('CreateUserController (Integration)', () => {
-	beforeEach(async () => {
-		await db.delete(usersTable);
-	});
+  beforeEach(async () => {
+    await db.delete(usersTable);
+  });
 
-	test('should create a new user', async () => {
-		const userPayload = {
-			firstName: 'John',
-			lastName: 'Doe',
-			email: 'john.doe@example.com',
-			password: 'password123',
-			confirmPassword: 'password123',
-		};
+  test('should create a new user', async () => {
+    const passwordPayload = faker.internet.password();
 
-		const response = await app.inject({
-			method: 'POST',
-			url: '/users',
-			payload: userPayload,
-		});
+    const userPayload = {
+      firstName: faker.person.firstName(),
+      lastName: faker.person.lastName(),
+      email: faker.internet.email(),
+      password: passwordPayload,
+      confirmPassword: passwordPayload,
+    };
 
-		assert.strictEqual(response.statusCode, 201);
+    const response = await app.inject({
+      method: 'POST',
+      url: '/users',
+      payload: userPayload,
+    });
 
-		const body = JSON.parse(response.payload);
+    assert.strictEqual(response.statusCode, 201);
 
-		assert(body.user.id);
-		assert.strictEqual(body.user.email, userPayload.email);
+    const body = JSON.parse(response.payload);
 
-		const [userInDb] = await db
-			.select()
-			.from(usersTable)
-			.where(eq(usersTable.email, body.user.email))
-			.limit(1);
+    assert(body.user.id);
+    assert.strictEqual(body.user.email, userPayload.email);
 
-		assert.ok(userInDb);
-		assert.strictEqual(userInDb.firstName, userPayload.firstName);
-	});
+    const [userInDb] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, body.user.email))
+      .limit(1);
 
-	test('should return 400 when sending invalid data', async () => {
-		const invalidPayload = {
-			firstName: '123',
-			lastName: 15,
-			email: 'invalid-email',
-			password: 'password',
-			confirmPassword: 'pass3453',
-		};
+    assert.ok(userInDb);
+    assert.strictEqual(userInDb.firstName, userPayload.firstName);
+  });
 
-		const response = await app.inject({
-			method: 'POST',
-			url: '/users',
-			payload: invalidPayload,
-		});
+  test('should return 400 when sending invalid data', async () => {
+    const invalidPayload = {
+      firstName: faker.number.int(),
+      lastName: faker.internet.emoji(),
+      email: faker.animal.fish(),
+      password: faker.internet.password(),
+      confirmPassword: faker.internet.password(),
+    };
 
-		assert.strictEqual(response.statusCode, 400);
-	});
+    const response = await app.inject({
+      method: 'POST',
+      url: '/users',
+      payload: invalidPayload,
+    });
 
-	test('shoud throw an error if email already exists', async () => {
-		const firstName = 'Adriano';
-		const lastName = 'Miranda';
-		const email = 'adriano@email.com';
-		const password = 'password123';
-		const confirmPassword = 'password123';
+    assert.strictEqual(response.statusCode, 400);
+  });
 
-		const userPayload = {
-			firstName,
-			lastName,
-			email,
-			password,
-			confirmPassword,
-		};
+  test('shoud throw an error if email already exists', async () => {
+    const firstName = faker.person.firstName();
+    const lastName = faker.person.lastName();
+    const email = faker.internet.email();
+    const password = faker.internet.password();
+    const confirmPassword = password;
 
-		const passwordHash = await bcrypt.hash(password, 10);
+    const userPayload = {
+      firstName,
+      lastName,
+      email,
+      password,
+      confirmPassword,
+    };
 
-		await db
-			.insert(usersTable)
-			.values({
-				firstName,
-				lastName,
-				email,
-				passwordHash,
-			})
-			.returning()
-			.execute();
+    const passwordHash = await bcrypt.hash(password, 10);
 
-		const response = await app.inject({
-			method: 'POST',
-			url: '/users',
-			payload: userPayload,
-		});
+    await db
+      .insert(usersTable)
+      .values({
+        firstName,
+        lastName,
+        email,
+        passwordHash,
+      })
+      .returning()
+      .execute();
 
-		assert.strictEqual(response.statusCode, 400);
+    const response = await app.inject({
+      method: 'POST',
+      url: '/users',
+      payload: userPayload,
+    });
 
-		const body = response.json();
+    assert.strictEqual(response.statusCode, 400);
 
-		assert.strictEqual(body.code, ERROR_CODES.EMAIL_ALREADY_IN_USE);
-	});
+    const body = response.json();
+
+    assert.strictEqual(body.code, ERROR_CODES.EMAIL_ALREADY_IN_USE);
+  });
 });
