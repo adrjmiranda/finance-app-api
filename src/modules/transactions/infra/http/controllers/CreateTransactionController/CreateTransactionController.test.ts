@@ -12,7 +12,7 @@ import {
 } from '#/shared/infra/database/drizzle/schemas/transactions.js';
 import { and, eq } from 'drizzle-orm';
 import { ERROR_CODES } from '#/shared/constants/errors/codes/codes.js';
-import { randomUUID } from 'node:crypto';
+
 import { faker } from '@faker-js/faker';
 
 describe('CreateTransactionController (Integration)', () => {
@@ -74,7 +74,7 @@ describe('CreateTransactionController (Integration)', () => {
     };
 
     const { authenticatedUser, token } = await createAndAuthenticateUser(app);
-    const userId = authenticatedUser?.id ?? randomUUID();
+    const userId = authenticatedUser?.id ?? faker.string.uuid();
 
     const response = await app.inject({
       method: 'POST',
