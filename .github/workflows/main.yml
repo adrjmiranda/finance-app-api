@@ -27,6 +27,9 @@ jobs:
       - name: Prettier
         run: npm run prettier:check
 
+      - name: Start Database for Test
+        run: docker compose -f docker-compose.test.yml up -d
+
       - name: Criar arquivo .env
         run: |
           touch .env.test
