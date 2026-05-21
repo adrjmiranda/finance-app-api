@@ -27,14 +27,17 @@ jobs:
       - name: Prettier
         run: npm run prettier:check
 
-      - name: Criar arquivo .env
-        run: |
-          touch .env.test
-          echo "SERVER_ENV=${{ secrets.SERVER_ENV }}" >> .env.test
-          echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env.test
-          echo "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> .env.test
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env.test
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env.test
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v2.0
+        with:
+          envkey_SERVER_ENV: ${{ secrets.SERVER_ENV }}
+          envkey_SERVER_PORT: ${{ secrets.SERVER_PORT }}
+          envkey_SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          envkey_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          envkey_JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          file_name: .env.test
+          fail_on_empty: false
+          sort_keys: false
 
       - name: Start Database for Test
         run: docker compose -f docker-compose.test.yml up -d
