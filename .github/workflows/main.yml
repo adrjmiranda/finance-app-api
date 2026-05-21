@@ -27,5 +27,14 @@ jobs:
       - name: Prettier
         run: npm run prettier:check
 
+      - name: Criar arquivo .env
+        run: |
+          touch .env.test
+          echo "SERVER_ENV=${{ secrets.SERVER_ENV }}" >> .env.test
+          echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env.test
+          echo "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> .env.test
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env.test
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env.test
+
       - name: Test
         run: npm run test
