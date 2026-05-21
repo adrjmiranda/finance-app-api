@@ -7,11 +7,11 @@ import { envSchema } from '#/shared/env/schema.js';
 const _env = envSchema.safeParse(process.env);
 
 if (_env.success === false) {
-	const msg = 'Invalid environment variables';
-	const formattedError = z.treeifyError(_env.error);
+  const msg = 'Invalid environment variables';
+  const formattedError = z.treeifyError(_env.error);
 
-	console.error(msg, formattedError);
-	throw new Error(msg);
+  console.error(msg, formattedError);
+  throw new Error(msg);
 }
 
 export const env = _env.data;

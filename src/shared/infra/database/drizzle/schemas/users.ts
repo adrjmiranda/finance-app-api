@@ -1,16 +1,16 @@
 import { pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 
 export const usersTable = pgTable('users', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	firstName: varchar('first_name', { length: 50 }).notNull(),
-	lastName: varchar('last_name', { length: 50 }).notNull(),
-	email: varchar('email', { length: 100 }).unique().notNull(),
-	passwordHash: varchar('password_hash', { length: 100 }).notNull(),
-	createdAt: timestamp('created_at', { withTimezone: true })
-		.defaultNow()
-		.notNull(),
-	updatedAt: timestamp('updated_at', { withTimezone: true })
-		.defaultNow()
-		.notNull()
-		.$onUpdate(() => new Date()),
+  id: uuid('id').primaryKey().defaultRandom(),
+  firstName: varchar('first_name', { length: 50 }).notNull(),
+  lastName: varchar('last_name', { length: 50 }).notNull(),
+  email: varchar('email', { length: 100 }).unique().notNull(),
+  passwordHash: varchar('password_hash', { length: 100 }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
 });

@@ -1,8 +1,8 @@
 export interface ITokenPayload {
-	sub: string;
+  sub: string;
 }
 
 export interface ITokenProvider {
-	generate(payload: object, subject: string, expiresIn: string): string;
-	verify(token: string): ITokenPayload;
+  generate(payload: object, subject: string, expiresIn: string): string;
+  verify(token: string): ITokenPayload;
 }
