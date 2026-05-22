@@ -7,7 +7,6 @@
   "bracketSpacing": true,
   "arrowParens": "always",
   "endOfLine": "lf",
-  "useEditorConfig": true,
   "insertPragma": false,
   "requirePragma": false,
   "proseWrap": "preserve",
