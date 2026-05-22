@@ -12,10 +12,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '24.16.0'
 
@@ -29,16 +29,17 @@ jobs:
         run: npm run prettier:check
 
       - name: Make test envfile
-        uses: SpicyPizza/create-envfile@v2.0
+        uses: actions/create-envfile@v2.0.3
         with:
-          envkey_SERVER_ENV: ${{ secrets.SERVER_ENV }}
-          envkey_SERVER_PORT: ${{ secrets.SERVER_PORT }}
-          envkey_SERVER_HOST: ${{ secrets.SERVER_HOST }}
-          envkey_DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          envkey_JWT_SECRET: ${{ secrets.JWT_SECRET }}
           file_name: .env.test
           fail_on_empty: false
           sort_keys: false
+          envkey: |
+            SERVER_ENV=${{ secrets.SERVER_ENV }}
+            SERVER_PORT=${{ secrets.SERVER_PORT }}
+            SERVER_HOST=${{ secrets.SERVER_HOST }}
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
 
       - name: Start Database for Test
         run: docker compose -f docker-compose.test.yml up -d
@@ -59,10 +60,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '24.16.0'
 
@@ -70,18 +71,35 @@ jobs:
         run: npm ci --include=dev
 
       - name: Make test envfile
-        uses: SpicyPizza/create-envfile@v2.0
+        uses: actions/create-envfile@v2.0.3
         with:
-          envkey_SERVER_ENV: ${{ secrets.SERVER_ENV }}
-          envkey_SERVER_PORT: ${{ secrets.SERVER_PORT }}
-          envkey_SERVER_HOST: ${{ secrets.SERVER_HOST }}
-          envkey_DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          envkey_JWT_SECRET: ${{ secrets.JWT_SECRET }}
           file_name: .env
-          fail_on_empty: false
           sort_keys: false
+          fail_on_empty: false
+          envkey: |
+            SERVER_ENV=${{ secrets.SERVER_ENV }}
+            SERVER_PORT=${{ secrets.SERVER_PORT }}
+            SERVER_HOST=${{ secrets.SERVER_HOST }}
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
 
       - name: Run Migrates
         run: |
           npm run db:generate
           npm run db:migrate
+
+  deploy:
+    needs: migrate
+    environment: deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Deploy
+        if: github.ref == 'refs/heads/main'
+        env:
+          deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"
