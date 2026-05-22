@@ -29,7 +29,7 @@ jobs:
         run: npm run prettier:check
 
       - name: Make test envfile
-        uses: actions/create-envfile@v2.0.3
+        uses: SpicyPizza/create-envfile@v2.0.3
         with:
           file_name: .env.test
           fail_on_empty: false
@@ -71,7 +71,7 @@ jobs:
         run: npm ci --include=dev
 
       - name: Make test envfile
-        uses: actions/create-envfile@v2.0.3
+        uses: SpicyPizza/create-envfile@v2.0.3
         with:
           file_name: .env
           sort_keys: false
