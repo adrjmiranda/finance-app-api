@@ -7,8 +7,8 @@ on:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
     environment: test
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -51,3 +51,37 @@ jobs:
 
       - name: Test
         run: npm run test
+
+  migrate:
+    needs: check
+    environment: production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.16.0'
+
+      - name: Install dependences
+        run: npm ci --include=dev
+
+      - name: Make test envfile
+        uses: SpicyPizza/create-envfile@v2.0
+        with:
+          envkey_SERVER_ENV: ${{ secrets.SERVER_ENV }}
+          envkey_SERVER_PORT: ${{ secrets.SERVER_PORT }}
+          envkey_SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          envkey_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          envkey_JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          file_name: .env
+          fail_on_empty: false
+          sort_keys: false
+
+      - name: Run Migrates
+        run: |
+          npm run db:generate
+          npm run db:migrate
