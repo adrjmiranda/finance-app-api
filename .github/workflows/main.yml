@@ -7,7 +7,6 @@ on:
 
 jobs:
   check:
-    needs: pre
     runs-on: ubuntu-latest
     environment: test
 
