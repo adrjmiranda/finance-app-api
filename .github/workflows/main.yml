@@ -35,7 +35,9 @@ jobs:
           echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env.test
           echo "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> .env.test
           echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env.test
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env.test
+          echo "JWT_SECRET='$SECRET_VAL'" >> .env.test
+        env:
+          SECRET_VAL: ${{ secrets.JWT_SECRET }}
 
       - name: Start Database for Test
         run: docker compose -f docker-compose.test.yml up -d
