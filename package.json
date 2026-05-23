@@ -38,8 +38,8 @@
   "type": "module",
   "imports": {
     "#/*": {
-      "types": "./src/*.ts",
-      "default": "./dist/*.js"
+      "types": "./src/*",
+      "default": "./dist/*"
     }
   },
   "devDependencies": {
