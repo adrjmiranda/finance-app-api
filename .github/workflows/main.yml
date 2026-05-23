@@ -30,7 +30,7 @@ jobs:
 
       - name: Make test envfile
         run: |
-          touch: .env.test
+          touch .env.test
           echo: "SERVER_ENV=${{ secrets.SERVER_ENV }}" >> .env.test
           echo: "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env.test
           echo: "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> .env.test
@@ -68,7 +68,7 @@ jobs:
 
       - name: Make test envfile
         run: |
-          touch: .env
+          touch .env
           echo: "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
 
       - name: Run Migrates
