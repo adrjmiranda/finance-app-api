@@ -33,6 +33,15 @@ app.register(fastifySwagger, {
       description: 'FinanceApp API Documentation',
       version: '1.0.0',
     },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
   },
   transform: jsonSchemaTransform,
 });
