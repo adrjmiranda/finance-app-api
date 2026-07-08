@@ -6,15 +6,20 @@ import { AuthenticateUserController } from '#/modules/users/infra/http/controlle
 import { CreateUserController } from '#/modules/users/infra/http/controllers/CreateUserController/CreateUserController.js';
 import { authenticateBodySchema } from '#/modules/users/schemas/requests/body/authenticate-body-schema.js';
 import { createUserBodySchema } from '#/modules/users/schemas/requests/body/create-user-body-schema.js';
+import { refreshTokenBodySchema } from '#/modules/users/schemas/requests/body/refresh-token-body-schema.js';
 import { authenticateResponseSchema } from '#/modules/users/schemas/responses/authenticate-response-schema.js';
 import { createUserResponseSchema } from '#/modules/users/schemas/responses/create-user-response-schema.js';
+import { refreshTokenResponseSchema } from '#/modules/users/schemas/responses/refresh-token-response-shema.js';
 import { httpRouteAdapter } from '#/shared/adapters/HttpRouteAdapter.js';
+
+import { RefreshTokenController } from '../controllers/RefreshTokenController/RefreshTokenController.js';
 
 export async function usersRoutes(app: FastifyInstance) {
   const createUserController = container.resolve(CreateUserController);
   const authenticateUserController = container.resolve(
     AuthenticateUserController
   );
+  const refreshTokenController = container.resolve(RefreshTokenController);
 
   app.withTypeProvider<ZodTypeProvider>().post(
     '/',
@@ -43,5 +48,19 @@ export async function usersRoutes(app: FastifyInstance) {
       },
     },
     httpRouteAdapter(authenticateUserController)
+  );
+  app.withTypeProvider<ZodTypeProvider>().post(
+    '/refresh',
+    {
+      schema: {
+        tags: ['Users'],
+        summary: 'Renew access token',
+        body: refreshTokenBodySchema,
+        response: {
+          200: refreshTokenResponseSchema,
+        },
+      },
+    },
+    httpRouteAdapter(refreshTokenController)
   );
 }

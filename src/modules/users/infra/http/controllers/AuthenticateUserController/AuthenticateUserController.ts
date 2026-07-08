@@ -26,13 +26,15 @@ export class AuthenticateUserController {
       password,
     });
 
-    const token = this.tokenProvider.generate({}, user.id, '15m');
+    const accessToken = this.tokenProvider.generate({}, user.id, '15m');
+    const refreshToken = this.tokenProvider.generate({}, user.id, '30h');
 
     return {
       statusCode: 200,
       body: {
         user,
-        token,
+        accessToken,
+        refreshToken,
       },
     };
   };

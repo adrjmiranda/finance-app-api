@@ -22,7 +22,7 @@ export class JasonWebTokenProvider implements ITokenProvider {
     return jwt.sign(payload, env.JWT_SECRET, options);
   }
 
-  verify(token: string): ITokenPayload {
+  async verify(token: string): Promise<ITokenPayload> {
     return jwt.verify(token, env.JWT_SECRET) as ITokenPayload;
   }
 }
