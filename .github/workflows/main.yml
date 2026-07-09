@@ -30,12 +30,13 @@ jobs:
 
       - name: Make test envfile
         run: |
-          touch .env.test
-          echo "SERVER_ENV=${{ secrets.SERVER_ENV }}" >> .env.test
-          echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env.test
-          echo "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> .env.test
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env.test
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env.test
+          cat << 'EOF' > .env.test
+          SERVER_ENV=${{ secrets.SERVER_ENV }}
+          SERVER_PORT=${{ secrets.SERVER_PORT }}
+          SERVER_HOST=${{ secrets.SERVER_HOST }}
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          EOF
         env:
           SECRET_VAL: ${{ secrets.JWT_SECRET }}
 
@@ -70,12 +71,13 @@ jobs:
 
       - name: Make envfile
         run: |
-          touch .env
-          echo "SERVER_ENV=${{ secrets.SERVER_ENV }}" >> .env
-          echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env
-          echo "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> .env
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          cat << 'EOF' > .env.test
+          SERVER_ENV=${{ secrets.SERVER_ENV }}
+          SERVER_PORT=${{ secrets.SERVER_PORT }}
+          SERVER_HOST=${{ secrets.SERVER_HOST }}
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          EOF
         env:
           SECRET_VAL: ${{ secrets.JWT_SECRET }}
 
