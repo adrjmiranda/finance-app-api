@@ -58,7 +58,7 @@ describe('RefreshTokenController', () => {
 
     assert.strictEqual(response.statusCode, 200);
     assert.deepStrictEqual(response.body, {
-      accessToken: mockNewAccessToken,
+      token: mockNewAccessToken,
       refreshToken: mockNewRefreshToken,
     });
   });
