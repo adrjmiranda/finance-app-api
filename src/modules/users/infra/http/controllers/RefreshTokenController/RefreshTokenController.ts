@@ -36,7 +36,7 @@ export class RefreshTokenController {
       return {
         statusCode: 200,
         body: {
-          accessToken: newAccessToken,
+          token: newAccessToken,
           refreshToken: newRefreshToken,
         },
       };

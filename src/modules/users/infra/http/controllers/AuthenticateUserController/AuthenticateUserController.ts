@@ -33,7 +33,7 @@ export class AuthenticateUserController {
       statusCode: 200,
       body: {
         user,
-        accessToken,
+        token: accessToken,
         refreshToken,
       },
     };
