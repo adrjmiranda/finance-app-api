@@ -35,7 +35,7 @@ jobs:
           echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env.test
           echo "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> .env.test
           echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env.test
-          echo "JWT_SECRET='$SECRET_VAL'" >> .env.test
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env.test
         env:
           SECRET_VAL: ${{ secrets.JWT_SECRET }}
 
@@ -75,7 +75,7 @@ jobs:
           echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env
           echo "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> .env
           echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-          echo "JWT_SECRET='$SECRET_VAL'" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
         env:
           SECRET_VAL: ${{ secrets.JWT_SECRET }}
 
